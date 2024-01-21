@@ -2,6 +2,7 @@ package com.oreomrone.locallens.ui.utils
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oreomrone.locallens.data.repositories.profile.ProfileRepository
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.ui.navigation.AppNavDests
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-  private val auth: Auth
+  private val auth: Auth,
+  private val profileRepository: ProfileRepository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(AuthUiState())
   val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -27,18 +29,41 @@ class AuthViewModel @Inject constructor(
       auth.sessionStatus.collect {
         when (it) {
           // when user is authenticated
-          is SessionStatus.Authenticated                                                               -> {
-            _uiState.update { currentState ->
-              currentState.copy(
-                session = it.session,
-                startingDestination = AppNavDests.Posts.name,
-                loadingStates = LoadingStates.SUCCESS
-              )
+          is SessionStatus.Authenticated
+          -> {
+            // Get their profile
+            val sessionProfile = it.session.user?.let { sessionUser ->
+              profileRepository.getProfileById(sessionUser.id)
+            }
+
+            if (sessionProfile !== null) {
+              // if profile exists
+              when (sessionProfile.username.isBlank()) {
+                // and if username is blank
+                true  -> {
+                  _uiState.update { currentState ->
+                    currentState.copy(
+                      session = null,
+                      startingDestination = AppNavDests.CompleteAccountProfile.name,
+                      loadingStates = LoadingStates.SUCCESS
+                    )
+                  }
+                }
+
+                // or if username is not blank
+                false -> {
+                  _uiState.update { currentState ->
+                    currentState.copy(
+                      session = null,
+                      startingDestination = AppNavDests.Posts.name,
+                      loadingStates = LoadingStates.SUCCESS
+                    )
+                  }
+                }
+              }
             }
           }
 
-          // when user is authenticated but haven't completed their account
-          // TODO
 
           // when user isn't authenticated
           SessionStatus.NetworkError, SessionStatus.LoadingFromStorage, SessionStatus.NotAuthenticated -> {

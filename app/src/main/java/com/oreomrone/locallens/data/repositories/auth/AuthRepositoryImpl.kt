@@ -38,11 +38,6 @@ class AuthRepositoryImpl @Inject constructor(
           )
         }
       }
-    } catch (e: Exception) {
-      Pair(
-        false,
-        e.message ?: "Sign in unsuccessful. Please try again."
-      )
     }
   }
 
@@ -75,11 +70,6 @@ class AuthRepositoryImpl @Inject constructor(
           )
         }
       }
-    } catch (e: Exception) {
-      Pair(
-        false,
-        "An error occurred. Please try again.\nError message: ${e.message}"
-      )
     }
   }
 
