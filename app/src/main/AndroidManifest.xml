@@ -44,6 +44,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <!-- Handle deep link for sign in -->
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="com.oreomrone.locallens" />
+                <data android:scheme="app" />
+            </intent-filter>
         </activity>
 
         <meta-data

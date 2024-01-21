@@ -5,10 +5,13 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -19,6 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +40,11 @@ import com.oreomrone.locallens.ui.components.Image
 import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
+import io.github.jan.supabase.gotrue.SessionStatus
+import io.github.jan.supabase.gotrue.SignOutScope
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.providers.Google
+import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -46,10 +53,14 @@ import java.io.File
 fun CameraTest(
   viewModel: CameraTestViewModel = hiltViewModel()
 ) {
+  val couroutineScope = rememberCoroutineScope()
+
+  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
   val action =
     viewModel.supabaseClient.composeAuth.rememberSignInWithGoogle(onResult = { result -> //optional error handling
       when (result) {
-        is NativeSignInResult.Success -> {
+        is NativeSignInResult.Success      -> {
           Log.d(
             "QuanTag",
             "Success"
@@ -64,7 +75,11 @@ fun CameraTest(
 
         }
 
-        is NativeSignInResult.Error -> {
+        is NativeSignInResult.Error        -> {
+          couroutineScope.launch {
+            viewModel.auth.signInWith(Google)
+          }
+
           Log.d(
             "QuanTag",
             "Error"
@@ -85,7 +100,24 @@ fun CameraTest(
         viewModel.auth.signInWith(Google)
       })
 
-  Button(onClick = { action.startFlow() }) {
-    Text("Google Login")
+
+
+  Column(
+    Modifier
+      .padding(WindowInsets.systemBars.asPaddingValues())
+      .verticalScroll(rememberScrollState())
+  ) {
+    Text(text = uiState.sessionText)
+
+    Button(onClick = { action.startFlow() }) {
+      Text("Google Login")
+    }
+    Button(onClick = {
+      couroutineScope.launch {
+        viewModel.auth.signOut(SignOutScope.LOCAL)
+      }
+    }) {
+      Text(text = "Sign out now")
+    }
   }
 }

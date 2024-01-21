@@ -27,13 +27,21 @@ import com.oreomrone.locallens.ui.tests.CameraTest
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.conditional
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.gotrue.handleDeeplinks
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+  @Inject
+  lateinit var supabaseClient: SupabaseClient
+
   @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
+
+    supabaseClient.handleDeeplinks(intent = intent) // Log in via Google
 
     setContent {
       val appNavController = rememberNavController()
@@ -64,11 +72,12 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface
           ) {
-            AppNavHost(modifier = Modifier.conditional(showBottomMainNavBar) {
-              padding(bottom = it.calculateBottomPadding())
-            },
-              navController = appNavController,
-              startDestination = AppNavDests.Posts.name) // Change entry here
+//            AppNavHost(modifier = Modifier.conditional(showBottomMainNavBar) {
+//              padding(bottom = it.calculateBottomPadding())
+//            },
+//              navController = appNavController,
+//              startDestination = AppNavDests.Posts.name) // Change entry here
+            CameraTest()
           }
         }
       }
