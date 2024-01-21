@@ -28,7 +28,7 @@ class PlacesAutocompleteRepositoryImpl @Inject constructor(
         )
         append(
           "X-Goog-Api-Key",
-          "AIzaSyAmfUrL4XL1BvkX3ua_vy0F-p84phgX8fI"
+          "AIzaSyD_RF-XX9buzSPGjJyiSMLUMFoFfMeYs_4"
         )
         append(
           "X-Goog-Fieldmask",

@@ -1,5 +1,6 @@
 package com.oreomrone.locallens.ui.tests
 
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
@@ -32,6 +33,11 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import com.oreomrone.locallens.ui.components.Image
+import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
+import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
+import io.github.jan.supabase.compose.auth.composeAuth
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.providers.Google
 import java.io.File
 
 
@@ -40,90 +46,46 @@ import java.io.File
 fun CameraTest(
   viewModel: CameraTestViewModel = hiltViewModel()
 ) {
-  val cameraPermissionState = rememberPermissionState(
-    android.Manifest.permission.CAMERA
-  )
-
-  var pictureTaken by remember { mutableStateOf(false) }
-
-  val context = LocalContext.current
-
-  val file = File(
-    context.cacheDir,
-    "post_image_${System.currentTimeMillis()}.png"
-  )
-
-  val uri = FileProvider.getUriForFile(
-    context,
-    context.packageName + ".provider",
-    file
-  )
-
-  val cameraLauncher =
-    rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { isSuccessful ->
-      pictureTaken = isSuccessful
-      viewModel.onImageFileChange(file.readBytes())
-      viewModel.onImageChange(
-        uri.toString()
-      )
-    }
-
-  LaunchedEffect(Unit) {
-    if (cameraPermissionState.status.isGranted) {
-      cameraLauncher.launch(uri)
-    }
-  }
-
-  val uiState = viewModel.uiState.collectAsStateWithLifecycle().value
-
-  Box(
-    modifier = Modifier.fillMaxSize(),
-    contentAlignment = Alignment.Center
-  ) {
-    Column(
-      Modifier
-        .padding(horizontal = 16.dp)
-        .verticalScroll(rememberScrollState()),
-      horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-      when {
-        cameraPermissionState.status.isGranted -> {
-          Text("Camera permission Granted")
-          Button(onClick = { cameraLauncher.launch(uri) }) {
-            Text(text = "Take a picture")
-          }
-
-          if (pictureTaken) {
-            Image(
-              modifier = Modifier
-                .padding(top = 16.dp)
-                .fillMaxWidth()
-                .aspectRatio(1f)
-                .clip(RoundedCornerShape(24.dp)),
-              model = uiState.imageURL,
-            )
-          }
+  val action =
+    viewModel.supabaseClient.composeAuth.rememberSignInWithGoogle(onResult = { result -> //optional error handling
+      when (result) {
+        is NativeSignInResult.Success -> {
+          Log.d(
+            "QuanTag",
+            "Success"
+          )
         }
 
-        else                                   -> {
-          Text(
-            when {
-              cameraPermissionState.status.shouldShowRationale -> {
-                "The camera is important for this app. Please grant the permission."
-              }
-
-              else                                             -> {
-                "Camera permission required for this feature to be available. " + "Please grant the permission"
-              }
-            }
+        is NativeSignInResult.ClosedByUser -> {
+          Log.d(
+            "QuanTag",
+            "ClosedByUser"
           )
 
-          Button(onClick = { cameraPermissionState.launchPermissionRequest() }) {
-            Text("Request permission")
-          }
+        }
+
+        is NativeSignInResult.Error -> {
+          Log.d(
+            "QuanTag",
+            "Error"
+          )
+
+        }
+
+        is NativeSignInResult.NetworkError -> {
+          Log.d(
+            "QuanTag",
+            "NetworkError"
+          )
+
         }
       }
-    }
+    },
+      fallback = { // optional: add custom error handling, not required by default
+        viewModel.auth.signInWith(Google)
+      })
+
+  Button(onClick = { action.startFlow() }) {
+    Text("Google Login")
   }
 }

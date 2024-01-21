@@ -23,6 +23,7 @@ import com.oreomrone.locallens.ui.components.BottomMainNavBar
 import com.oreomrone.locallens.ui.navigation.AppNavDests
 import com.oreomrone.locallens.ui.navigation.AppNavHost
 import com.oreomrone.locallens.ui.navigation.BottomMainNavVisibleDestinations
+import com.oreomrone.locallens.ui.tests.CameraTest
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.conditional
 import dagger.hilt.android.AndroidEntryPoint
