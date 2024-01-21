@@ -60,7 +60,7 @@ private fun EditPostDetails(
         )
       }
 
-      LoadingStates.SUCCESS -> {
+      else -> {
         PostInputLayout(
           title = "Edit post",
           navigationIcon = Icons.Default.ArrowBack,

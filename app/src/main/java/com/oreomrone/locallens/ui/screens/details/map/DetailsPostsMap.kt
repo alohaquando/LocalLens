@@ -62,7 +62,9 @@ private fun DetailsPostsMap(
   favoriteOnClick: suspend (String) -> Unit = {},
   deleteOnClick: suspend (String) -> Unit = {},
 ) {
-  Crossfade(targetState = uiState.loadingState) {
+  Crossfade(targetState = uiState.loadingState,
+    label = "DetailsPostsMap Crossfade"
+  ) {
     when (it) {
       LoadingStates.LOADING -> {
         LoadingOverlay()
@@ -72,7 +74,7 @@ private fun DetailsPostsMap(
         ErrorOverlay(backOnClick = backOnClick)
       }
 
-      LoadingStates.SUCCESS -> {
+      else -> {
         PostsMapLayout(
           postsClusterItems = uiState.postsClusterItems,
           mapStartingPosition = uiState.startingMapPosition,

@@ -48,8 +48,7 @@ class CompleteAccountProfileViewModel @Inject constructor(
             loadingStates = LoadingStates.SUCCESS
           )
         }
-      }
-      else {
+      } else {
         _uiState.update { currentState ->
           currentState.copy(
             loadingStates = LoadingStates.ERROR
@@ -60,7 +59,41 @@ class CompleteAccountProfileViewModel @Inject constructor(
   }
 
   suspend fun performComplete() {
-    profileRepository
+    try {
+      val res = profileRepository.updateProfile(
+        id = auth.currentSessionOrNull()!!.user!!.id,
+        fullName = _uiState.value.name,
+        username = _uiState.value.username,
+        bio = _uiState.value.bio,
+        isPrivate = false,
+        imageUrl = _uiState.value.imageURL,
+        imageFile = _uiState.value.imageFile
+      )
+
+      when (res.first) {
+        true -> {
+          _uiState.update { currentState ->
+            currentState.copy(
+              loadingStates = LoadingStates.SUCCESS,
+            )
+          }
+          _uiState.value.snackbarHostState.showSnackbar(res.second)
+        }
+        else -> {
+          _uiState.update { currentState ->
+            currentState.copy(
+              loadingStates = LoadingStates.ERROR
+            )
+          }
+        }
+      }
+    } catch (e: Exception) {
+      _uiState.update { currentState ->
+        currentState.copy(
+          loadingStates = LoadingStates.ERROR
+        )
+      }
+    }
   }
 
   suspend fun performSignOut() {
@@ -138,6 +171,7 @@ data class CompleteAccountProfileUiState(
   val username: String = "",
   val email: String = "", // Take from auth
   val bio: String = "",
+  val isPrivate: Boolean = false,
 
   // Image
   val imageURL: String? = null,

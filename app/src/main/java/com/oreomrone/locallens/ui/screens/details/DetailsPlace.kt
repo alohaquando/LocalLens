@@ -91,7 +91,7 @@ private fun DetailsPlace(
         )
       }
 
-      LoadingStates.SUCCESS -> {
+      else -> {
         DetailsLayout(title = if (uiState.place != null) uiState.place.name else "",
           subtitle = uiState.place?.address ?: "",
           image = uiState.place?.image ?: "",

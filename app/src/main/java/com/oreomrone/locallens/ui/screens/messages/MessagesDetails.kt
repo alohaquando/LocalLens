@@ -117,19 +117,22 @@ private fun MessagesDetails(
           })
       }
     }) { innerPadding ->
-    Crossfade(targetState = uiState.loadingState,
+    Crossfade(
+      targetState = uiState.loadingState,
       label = "MessageDetails Crossfade"
     ) {
-      when(it) {
+      when (it) {
         LoadingStates.LOADING -> {
           LoadingOverlay()
         }
-        LoadingStates.ERROR -> {
+
+        LoadingStates.ERROR   -> {
           ErrorOverlay(
             showBackButton = false
           )
         }
-        LoadingStates.SUCCESS  -> {
+
+        else                  -> {
           LazyColumn(
             modifier = Modifier
               .fillMaxSize()

@@ -23,9 +23,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.ui.components.LoadingOverlay
-import com.oreomrone.locallens.ui.components.layouts.DetailsLayout
 import com.oreomrone.locallens.ui.components.Post
 import com.oreomrone.locallens.ui.components.StatItemButton
+import com.oreomrone.locallens.ui.components.layouts.DetailsLayout
 import com.oreomrone.locallens.ui.components.layouts.ErrorOverlay
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.PostViewModel
@@ -94,21 +94,22 @@ private fun DetailsPerson(
 ) {
   val coroutineScope = rememberCoroutineScope()
 
-  Crossfade(targetState = uiState.loadingStates,
+  Crossfade(
+    targetState = uiState.loadingStates,
     label = "DetailsPerson Crossfade"
   ) {
-    when(it) {
+    when (it) {
       LoadingStates.LOADING -> {
         LoadingOverlay()
       }
 
-      LoadingStates.ERROR -> {
+      LoadingStates.ERROR   -> {
         ErrorOverlay(
           backOnClick = backOnClick
         )
       }
 
-      LoadingStates.SUCCESS -> {
+      else                  -> {
         DetailsLayout(title = if (uiState.user != null) "@${uiState.user.username}" else "",
           subtitle = uiState.user?.name ?: "",
           image = uiState.user?.image ?: "",

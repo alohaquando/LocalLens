@@ -63,7 +63,7 @@ private fun AccountSettingChangeProfile(
         )
       }
 
-      LoadingStates.SUCCESS -> {
+      else                  -> {
         ProfileInputLayout(
           title = "Edit your profile",
           navigationIcon = Icons.Default.ArrowBack,
@@ -88,7 +88,6 @@ private fun AccountSettingChangeProfile(
         )
       }
     }
-
   }
 }
 

@@ -171,7 +171,7 @@ private fun Discover(
         }
 
         // All posts
-        LoadingStates.SUCCESS -> {
+        else -> {
           Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
             if (uiState.posts.isEmpty()) {

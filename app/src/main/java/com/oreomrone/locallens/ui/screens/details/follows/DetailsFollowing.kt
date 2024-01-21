@@ -79,7 +79,7 @@ private fun DetailsFollowing(
         )
       }
 
-      LoadingStates.SUCCESS -> {
+      else -> {
         Scaffold(
           modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)

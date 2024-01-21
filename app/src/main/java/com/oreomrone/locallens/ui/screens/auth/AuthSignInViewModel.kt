@@ -3,9 +3,13 @@ package com.oreomrone.locallens.ui.screens.auth
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oreomrone.locallens.data.repositories.auth.AuthRepository
+import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.ui.utils.validateEmail
 import com.oreomrone.locallens.ui.utils.validatePassword
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.compose.auth.ComposeAuth
+import io.github.jan.supabase.gotrue.Auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +19,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthSignInViewModel @Inject constructor(
-
+  val composeAuth: ComposeAuth,
+  val auth: Auth,
+  val authRepository: AuthRepository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(AuthSignInUiState())
   val uiState: StateFlow<AuthSignInUiState> = _uiState.asStateFlow()
@@ -49,8 +55,14 @@ class AuthSignInViewModel @Inject constructor(
 
   suspend fun performGoogleSignIn() {
     viewModelScope.launch {
-      // TODO
+      val result = authRepository.signInWithGoogle()
     }
+  }
+
+  suspend fun showSnackBar(message: String) {
+    _uiState.value.snackbarHostState.showSnackbar(
+      message = message,
+    )
   }
 }
 
@@ -59,9 +71,7 @@ data class AuthSignInUiState(
   val emailValid: Boolean = false,
   val passwordValid: Boolean = false,
   val inputValid: Boolean = false,
-  val isLoading: Boolean = false,
-  val isSuccess: Boolean = false,
-  val isFailure: Boolean = false,
+  val loadingStates: LoadingStates = LoadingStates.IDLE,
   val snackbarHostState: SnackbarHostState = SnackbarHostState()
 )
 

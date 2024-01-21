@@ -54,47 +54,48 @@ class MainActivity : ComponentActivity() {
       val startDestinationViewModel: StartDestinationViewModel = hiltViewModel()
       val authUiState by startDestinationViewModel.uiState.collectAsStateWithLifecycle()
 
-      val testViewModel: TestViewModel= hiltViewModel()
+      val testViewModel: TestViewModel = hiltViewModel()
       val testUiState by testViewModel.uiState.collectAsStateWithLifecycle()
 
       LocalLensTheme {
         Scaffold(
           // App main nav bar
           bottomBar = {
-          AnimatedVisibility(
-            visible = showBottomMainNavBar,
-            enter = fadeIn(),
-            exit = fadeOut()
-          ) {
-            BottomMainNavBar(currentDestination = currentDestination,
-              destinationOnClick = {
-                appNavController.navigate(it) {
-                  popUpTo(appNavController.graph.findStartDestination().id) {
-                    saveState = true
+            AnimatedVisibility(
+              visible = showBottomMainNavBar,
+              enter = fadeIn(),
+              exit = fadeOut()
+            ) {
+              BottomMainNavBar(currentDestination = currentDestination,
+                destinationOnClick = {
+                  appNavController.navigate(it) {
+                    popUpTo(appNavController.graph.findStartDestination().id) {
+                      saveState = true
+                    }
+                    launchSingleTop = true
+                    restoreState = true
                   }
-                  launchSingleTop = true
-                  restoreState = true
-                }
-              })
-          }
-        }) {
+                })
+            }
+          }) {
           Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface
           ) {
             // App main nav host
-            Crossfade(targetState = authUiState.loadingStates,
+            Crossfade(
+              targetState = authUiState.loadingStates,
               label = "MainActivity Crossfade"
             ) {
               when (it) {
-                LoadingStates.LOADING, LoadingStates.ERROR -> {
-                  LoadingOverlay()
-                }
                 LoadingStates.SUCCESS -> {
                   AppNavHost(
                     navController = appNavController,
                     startDestination = authUiState.startingDestination!!
                   )
+                }
+                else                  -> {
+                  LoadingOverlay()
                 }
               }
             }
