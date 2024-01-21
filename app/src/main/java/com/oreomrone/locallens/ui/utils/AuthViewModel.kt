@@ -43,7 +43,7 @@ class AuthViewModel @Inject constructor(
                 true  -> {
                   _uiState.update { currentState ->
                     currentState.copy(
-                      session = null,
+                      session = it.session,
                       startingDestination = AppNavDests.CompleteAccountProfile.name,
                       loadingStates = LoadingStates.SUCCESS
                     )
@@ -54,12 +54,20 @@ class AuthViewModel @Inject constructor(
                 false -> {
                   _uiState.update { currentState ->
                     currentState.copy(
-                      session = null,
+                      session = it.session,
                       startingDestination = AppNavDests.Posts.name,
                       loadingStates = LoadingStates.SUCCESS
                     )
                   }
                 }
+              }
+            } else{
+              _uiState.update { currentState ->
+                currentState.copy(
+                  session = null,
+                  startingDestination = AppNavDests.AuthSignIn.name,
+                  loadingStates = LoadingStates.SUCCESS
+                )
               }
             }
           }
