@@ -8,7 +8,6 @@ import com.oreomrone.locallens.ui.navigation.AppNavDests
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.SessionStatus
-import io.github.jan.supabase.gotrue.user.UserSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class AuthViewModel @Inject constructor(
+class StartDestinationViewModel @Inject constructor(
   private val auth: Auth,
   private val profileRepository: ProfileRepository
 ) : ViewModel() {
@@ -43,7 +42,6 @@ class AuthViewModel @Inject constructor(
                 true  -> {
                   _uiState.update { currentState ->
                     currentState.copy(
-                      session = it.session,
                       startingDestination = AppNavDests.CompleteAccountProfile.name,
                       loadingStates = LoadingStates.SUCCESS
                     )
@@ -54,7 +52,6 @@ class AuthViewModel @Inject constructor(
                 false -> {
                   _uiState.update { currentState ->
                     currentState.copy(
-                      session = it.session,
                       startingDestination = AppNavDests.Posts.name,
                       loadingStates = LoadingStates.SUCCESS
                     )
@@ -64,7 +61,6 @@ class AuthViewModel @Inject constructor(
             } else{
               _uiState.update { currentState ->
                 currentState.copy(
-                  session = null,
                   startingDestination = AppNavDests.AuthSignIn.name,
                   loadingStates = LoadingStates.SUCCESS
                 )
@@ -77,7 +73,6 @@ class AuthViewModel @Inject constructor(
           SessionStatus.NetworkError, SessionStatus.LoadingFromStorage, SessionStatus.NotAuthenticated -> {
             _uiState.update { currentState ->
               currentState.copy(
-                session = null,
                 startingDestination = AppNavDests.AuthSignIn.name,
                 loadingStates = LoadingStates.SUCCESS
               )
@@ -90,7 +85,6 @@ class AuthViewModel @Inject constructor(
 }
 
 data class AuthUiState(
-  val session: UserSession? = null,
   val startingDestination: String? = null,
   val loadingStates: LoadingStates = LoadingStates.LOADING
 )

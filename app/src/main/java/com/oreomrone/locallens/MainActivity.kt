@@ -10,7 +10,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -24,14 +23,11 @@ import androidx.navigation.compose.rememberNavController
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.ui.components.BottomMainNavBar
 import com.oreomrone.locallens.ui.components.LoadingOverlay
-import com.oreomrone.locallens.ui.navigation.AppNavDests
 import com.oreomrone.locallens.ui.navigation.AppNavHost
 import com.oreomrone.locallens.ui.navigation.BottomMainNavVisibleDestinations
-import com.oreomrone.locallens.ui.tests.AuthGoogleTest
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
-import com.oreomrone.locallens.ui.utils.AuthViewModel
+import com.oreomrone.locallens.ui.utils.StartDestinationViewModel
 import com.oreomrone.locallens.ui.utils.TestViewModel
-import com.oreomrone.locallens.ui.utils.conditional
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.handleDeeplinks
@@ -55,8 +51,8 @@ class MainActivity : ComponentActivity() {
         appNavController.currentBackStackEntryAsState().value?.destination?.route
       val showBottomMainNavBar = currentDestination in BottomMainNavVisibleDestinations
 
-      val authViewModel: AuthViewModel = hiltViewModel()
-      val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+      val startDestinationViewModel: StartDestinationViewModel = hiltViewModel()
+      val authUiState by startDestinationViewModel.uiState.collectAsStateWithLifecycle()
 
       val testViewModel: TestViewModel= hiltViewModel()
       val testUiState by testViewModel.uiState.collectAsStateWithLifecycle()
