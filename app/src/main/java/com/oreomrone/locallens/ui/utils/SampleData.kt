@@ -69,7 +69,7 @@ object SampleData {
       sampleUser1,
       sampleUser2
     ),
-    postImageModel = "https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    image = "https://images.unsplash.com/photo-1583417319070-4a69db38a482?q=80&w=3270&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   )
   val samplePost1: Post = Post(
     id = "post_id_1",
@@ -82,7 +82,7 @@ object SampleData {
       sampleUser1,
       sampleUser2
     ),
-    postImageModel = "https://images.unsplash.com/photo-1516253954075-008d92ddede0?q=80&w=3274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    image = "https://images.unsplash.com/photo-1516253954075-008d92ddede0?q=80&w=3274&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   )
 
   // Messages

@@ -133,7 +133,7 @@ private fun DetailsPlace(
                   username = post.user?.username.toString(),
                   date = post.timestamp,
                   favorites = post.favorites.size,
-                  postImageModel = post.postImageModel,
+                  postImageModel = post.image,
                   userImageModel = post.user?.image.toString(), // TODO
                   isFavorite = false,
                   showDivider = true,

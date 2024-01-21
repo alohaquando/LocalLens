@@ -38,7 +38,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -64,7 +63,6 @@ import com.oreomrone.locallens.ui.components.PostMapMarker
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.PostClusterItem
 import kotlinx.coroutines.launch
-import okhttp3.internal.wait
 
 @OptIn(
   ExperimentalMaterial3Api::class,
@@ -149,7 +147,7 @@ fun PostsMapLayout(
                 username = post.user?.username.toString(),
                 date = post.timestamp,
                 favorites = post.favorites.size,
-                postImageModel = post.postImageModel,
+                postImageModel = post.image,
                 userImageModel = post.user?.image.toString(),
                 isFavorite = false, // TODO
                 showDivider = true,
@@ -213,7 +211,7 @@ fun PostsMapLayout(
           clusterContent = { cluster ->
             PostMapCluster(cluster.size.toString())
           },
-          clusterItemContent = { PostMapMarker(it.post?.postImageModel) },
+          clusterItemContent = { PostMapMarker(it.post?.image) },
           onClusterItemClick = {
             clickedPost = it.post
             showModalBottomSheet = true
@@ -260,7 +258,7 @@ fun PostsMapLayout(
             username = clickedPost!!.user?.username.toString(),
             date = clickedPost!!.timestamp,
             favorites = clickedPost!!.favorites.size,
-            postImageModel = clickedPost!!.postImageModel,
+            postImageModel = clickedPost!!.image,
             userImageModel = clickedPost!!.user?.image.toString(),
             isFavorite = false, // TODO
             showDivider = false,

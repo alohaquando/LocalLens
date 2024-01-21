@@ -51,7 +51,7 @@ class EditPostDetailsViewModel @Inject constructor(
       _uiState.update { currentState ->
         currentState.copy(
           caption = post.caption,
-          imageURL = post.postImageModel.toString(),
+          imageURL = post.image.toString(),
           captionValid = true,
           inputValid = true,
           selectedPlace = post.place,

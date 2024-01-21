@@ -187,7 +187,7 @@ private fun DetailsPerson(
                   username = uiState.user.username,
                   date = post.timestamp,
                   favorites = post.favorites.size,
-                  postImageModel = post.postImageModel,
+                  postImageModel = post.image,
                   userImageModel = uiState.user.image,
                   isFavorite = false,
                   showDivider = true,

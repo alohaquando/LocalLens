@@ -6,7 +6,7 @@ data class Post(
   val caption: String,
   val timestamp: String,
   val favorites: List<User> = listOf(),
-  val postImageModel: Any,
+  val image: Any,
   var user: User? = null,
 ) {
   override fun hashCode(): Int {
