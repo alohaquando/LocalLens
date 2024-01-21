@@ -4,29 +4,30 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Location(
+data class LocationDto(
     val latitude: Double,
     val longitude: Double
 )
 
 @Serializable
-data class DisplayName(
+data class DisplayNameDto(
     val text: String,
     @SerialName("languageCode")
     val languageCode: String? = null
 )
 
 @Serializable
-data class PlaceAutocomplete(
+data class PlaceAutocompleteDto(
     val id: String,
     @SerialName("formattedAddress")
     val formattedAddress: String,
-    val location: Location,
+    @SerialName("location")
+    val locationDto: LocationDto,
     @SerialName("displayName")
-    val displayName: DisplayName
+    val displayNameDto: DisplayNameDto
 )
 
 @Serializable
-data class PlacesResponse(
-    @SerialName("places") val places: List<PlaceAutocomplete>
+data class PlacesResponseDto(
+    @SerialName("places") val placesDto: List<PlaceAutocompleteDto>
 )

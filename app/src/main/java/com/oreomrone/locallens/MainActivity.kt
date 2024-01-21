@@ -30,6 +30,7 @@ import com.oreomrone.locallens.ui.navigation.BottomMainNavVisibleDestinations
 import com.oreomrone.locallens.ui.tests.AuthGoogleTest
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.AuthViewModel
+import com.oreomrone.locallens.ui.utils.TestViewModel
 import com.oreomrone.locallens.ui.utils.conditional
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
@@ -56,6 +57,9 @@ class MainActivity : ComponentActivity() {
 
       val authViewModel: AuthViewModel = hiltViewModel()
       val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
+
+      val testViewModel: TestViewModel= hiltViewModel()
+      val testUiState by testViewModel.uiState.collectAsStateWithLifecycle()
 
       LocalLensTheme {
         Scaffold(

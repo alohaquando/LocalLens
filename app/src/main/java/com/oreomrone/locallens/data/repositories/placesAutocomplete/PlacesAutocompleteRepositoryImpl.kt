@@ -1,8 +1,8 @@
 package com.oreomrone.locallens.data.repositories.placesAutocomplete
 
 import android.util.Log
-import com.oreomrone.locallens.data.dto.PlaceAutocomplete
-import com.oreomrone.locallens.data.dto.PlacesResponse
+import com.oreomrone.locallens.data.dto.PlaceAutocompleteDto
+import com.oreomrone.locallens.data.dto.PlacesResponseDto
 import io.ktor.client.HttpClient
 import io.ktor.client.request.headers
 import io.ktor.client.request.post
@@ -19,7 +19,7 @@ class PlacesAutocompleteRepositoryImpl @Inject constructor(
 ) : PlacesAutocompleteRepository {
 
   @Suppress("SpellCheckingInspection")
-  override suspend fun getPlaceAutocompleteResults(query: String): List<PlaceAutocomplete> {
+  override suspend fun getPlaceAutocompleteResults(query: String): List<PlaceAutocompleteDto> {
     val response = httpClient.post("https://places.googleapis.com/v1/places:searchText") {
       headers {
         append(
@@ -66,7 +66,7 @@ class PlacesAutocompleteRepositoryImpl @Inject constructor(
     ) {
       emptyList()
     } else {
-      json.decodeFromString<PlacesResponse>(response.bodyAsText()).places
+      json.decodeFromString<PlacesResponseDto>(response.bodyAsText()).placesDto
     }
   }
 }

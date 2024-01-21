@@ -1,14 +1,14 @@
 package com.oreomrone.locallens.domain.dtoToDomain
 
-import com.oreomrone.locallens.data.dto.PlaceAutocomplete
+import com.oreomrone.locallens.data.dto.PlaceAutocompleteDto
 import com.oreomrone.locallens.domain.Place
 
-fun PlaceAutocomplete.asDomainModel(): Place {
+fun PlaceAutocompleteDto.asDomainModel(): Place {
   return Place(
     id = id,
-    name = displayName.text,
+    name = displayNameDto.text,
     address = formattedAddress,
-    latitude = location.latitude,
-    longitude = location.longitude
+    latitude = locationDto.latitude,
+    longitude = locationDto.longitude
   )
 }

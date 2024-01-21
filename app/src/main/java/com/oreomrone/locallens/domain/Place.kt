@@ -1,7 +1,5 @@
 package com.oreomrone.locallens.domain
 
-import com.oreomrone.locallens.data.dto.PlaceAutocomplete
-
 data class Place(
   val id: String,
   val name: String,
