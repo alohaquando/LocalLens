@@ -13,4 +13,7 @@ data class ProfileDto(
   @SerialName("avatar_url") val image: String = "",
   @SerialName("is_super_user") val isSuperUser: Boolean = false,
   @SerialName("is_private") val isPrivate: Boolean = false,
+  @SerialName("followers") val followersDtos: List<FollowerDto> = emptyList(),
+  @SerialName("followings") val followingsDtos: List<FollowingsDto> = emptyList(),
+  @SerialName("places") val placesDtos: List<PlaceDto> = emptyList(),
 )

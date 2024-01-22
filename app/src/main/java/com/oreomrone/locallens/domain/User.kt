@@ -12,7 +12,7 @@ data class User(
   var posts: List<Post> = listOf(),
   var places: List<Place> = listOf(),
   var followers: List<User> = listOf(),
-  var following: List<User> = listOf(),
+  var followings: List<User> = listOf(),
 )
 
 // TODO: Requested

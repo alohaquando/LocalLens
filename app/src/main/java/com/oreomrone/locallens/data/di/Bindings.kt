@@ -12,6 +12,8 @@ import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.data.repositories.post.PostRepositoryImpl
 import com.oreomrone.locallens.data.repositories.profile.ProfileRepository
 import com.oreomrone.locallens.data.repositories.profile.ProfileRepositoryImpl
+import com.oreomrone.locallens.data.repositories.test.TestRepository
+import com.oreomrone.locallens.data.repositories.test.TestRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -34,4 +36,7 @@ abstract class Bindings {
 
     @Binds
     abstract fun bindPostRepository(impl: PostRepositoryImpl): PostRepository
+
+    @Binds
+    abstract fun bindTestRepository(impl: TestRepositoryImpl): TestRepository
 }

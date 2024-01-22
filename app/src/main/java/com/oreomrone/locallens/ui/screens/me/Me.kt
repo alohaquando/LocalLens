@@ -152,7 +152,7 @@ private fun Me(
         StatItemButton(
           modifier = Modifier.weight(1f),
           onClick = ({ placesOnClick(uiState.user?.id.toString()) }),
-          value = "000", // TODO
+          value = uiState.user?.places?.size.toString(),
           label = "Places",
         )
 
@@ -166,7 +166,7 @@ private fun Me(
         StatItemButton(
           modifier = Modifier.weight(1f),
           onClick = { followingOnClick(uiState.user?.id.toString()) },
-          value = uiState.user?.following?.size.toString(),
+          value = uiState.user?.followings?.size.toString(),
           label = "Following",
         )
       }

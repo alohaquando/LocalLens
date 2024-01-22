@@ -159,7 +159,7 @@ private fun DetailsPerson(
               StatItemButton(
                 modifier = Modifier.weight(1f),
                 onClick = ({ placesOnClick(uiState.user?.id.toString()) }),
-                value = "000", // TODO
+                value = uiState.user?.places?.size.toString(),
                 label = "Places",
               )
 
@@ -173,12 +173,11 @@ private fun DetailsPerson(
               StatItemButton(
                 modifier = Modifier.weight(1f),
                 onClick = { followingOnClick(uiState.user?.id.toString()) },
-                value = uiState.user?.following?.size.toString(),
+                value = uiState.user?.followings?.size.toString(),
                 label = "Following",
               )
             }
-          }
-        ) {
+          }) {
           if (uiState.user != null) {
             for (post in uiState.user.posts) {
               Post(
@@ -233,7 +232,12 @@ private fun DetailsPerson(
 private fun DetailsPersonPreview(
 ) {
   LocalLensTheme {
-    DetailsPerson(uiState = DetailsPersonUiState(user = SampleData.sampleUser1))
+    DetailsPerson(
+      uiState = DetailsPersonUiState(
+        user = SampleData.sampleUser1,
+        loadingStates = LoadingStates.IDLE
+      )
+    )
   }
 }
 

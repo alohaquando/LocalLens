@@ -12,6 +12,9 @@ fun ProfileDto.toUser(): User {
     bio = bio,
     image = image,
     isSuperUser = isSuperUser,
-    isPrivate = isPrivate
+    isPrivate = isPrivate,
+    followers = followersDtos.map { it.toUser() },
+    followings = followingsDtos.map { it.toUser() },
+    places = placesDtos.map { it.toPlace() }
   )
 }

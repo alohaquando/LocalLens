@@ -3,9 +3,11 @@ package com.oreomrone.locallens.data.repositories.profile
 import android.util.Log
 import com.oreomrone.locallens.data.dto.ProfileDto
 import com.oreomrone.locallens.data.utils.BuildProfileImageUrl
+import com.oreomrone.locallens.data.utils.cleanQueryString
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.storage.Storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -38,7 +40,15 @@ class ProfileRepositoryImpl @Inject constructor(
 
   override suspend fun getProfileById(id: String): ProfileDto? {
     return try {
-      val res = postgrest.from(table).select {
+      val res = postgrest.from(table).select(
+        Columns.raw(
+        """
+            *,
+            followers: follows!follows_followed_fkey(follower),
+            followings: follows!follows_follower_fkey(followed),
+            places: posts!posts_owner_fkey(place)
+          """.cleanQueryString()
+      )) {
         filter {
           eq(
             "id",
@@ -164,4 +174,6 @@ class ProfileRepositoryImpl @Inject constructor(
       false
     }
   }
+
+
 }

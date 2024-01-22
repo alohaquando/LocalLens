@@ -164,7 +164,7 @@ object SampleData {
         sampleUser2
       )
     )
-    sampleUser.following = sampleUser.following.plus(
+    sampleUser.followings = sampleUser.followings.plus(
       listOf(
         sampleUser1,
         sampleUser2
