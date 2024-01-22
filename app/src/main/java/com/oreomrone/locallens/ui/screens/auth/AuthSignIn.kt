@@ -1,7 +1,9 @@
 package com.oreomrone.locallens.ui.screens.auth
 
 import android.content.res.Configuration
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -58,34 +60,34 @@ fun AuthSignIn(
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
   val coroutineScope = rememberCoroutineScope()
-  val googleAuthAction =
-    viewModel.composeAuth.rememberSignInWithGoogle(onResult = { result -> //optional error handling
-      when (result) {
-        is NativeSignInResult.Success -> {
+  val googleAuthAction = viewModel.composeAuth.rememberSignInWithGoogle(onResult = { result ->
+    when (result) {
+      is NativeSignInResult.Success -> {
+        coroutineScope.launch {
+          viewModel.showSnackBar("Signed in with Google successfully")
+          viewModel.setLoading()
           navigateToMe()
         }
+      }
 
 
-        is NativeSignInResult.Error -> {
-          coroutineScope.launch {
-            viewModel.performGoogleSignIn()
-          }
-        }
-
-        is NativeSignInResult.NetworkError -> {
-          coroutineScope.launch {
-            viewModel.showSnackBar("A network error happened")
-          }
-        }
-
-        else -> {
-
+      is NativeSignInResult.Error -> {
+        coroutineScope.launch {
+          viewModel.performGoogleSignIn()
         }
       }
-    },
-      fallback = { // optional: add custom error handling, not required by default
-        viewModel.performGoogleSignIn()
-      })
+
+      is NativeSignInResult.NetworkError -> {
+        coroutineScope.launch {
+          viewModel.showSnackBar("A network error happened")
+        }
+      }
+
+      else -> {
+
+      }
+    }
+  })
   AuthSignIn(
     uiState = uiState,
     updateUiState = viewModel::updateUiState,
@@ -115,138 +117,130 @@ private fun AuthSignIn(
   val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
   val keyboardController = LocalSoftwareKeyboardController.current
 
-  Crossfade(
-    targetState = uiState.loadingStates,
-    label = "signIn Crossfade"
-  ) {
-    when (it) {
+  if (uiState.loadingState === LoadingStates.SUCCESS) {
+    navigateToMe()
+  }
 
-      LoadingStates.LOADING -> {
-        LoadingOverlay()
+  Scaffold(modifier = Modifier
+    .nestedScroll(scrollBehavior.nestedScrollConnection)
+    .imePadding(),
+    topBar = {
+      CenterAlignedTopAppBar(title = {
+        Text("Sign in")
+      })
+    },
+    snackbarHost = {
+      SnackbarHost(
+        hostState = uiState.snackbarHostState
+      )
+    }) { innerPadding ->
+    Column(
+      Modifier
+        .padding(top = innerPadding.calculateTopPadding())
+        .padding(horizontal = 16.dp)
+        .fillMaxWidth()
+        .verticalScroll(rememberScrollState())
+        .imePadding(),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.spacedBy(
+        space = 32.dp,
+        alignment = Alignment.CenterVertically
+      ),
+    ) {
+
+      // Google
+      GoogleAuthButton(onClick = {
+        coroutineScope.launch {
+          googleAuthOnClick()
+        }
+      })
+
+      Divider()
+
+      Column(
+        verticalArrangement = Arrangement.spacedBy(
+          space = 12.dp,
+          alignment = Alignment.CenterVertically
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+
+        ) {
+        ErrorAwareOutlinedTextField(
+          value = uiState.authSignInInfo.email,
+          onValueChange = { updateUiState(uiState.authSignInInfo.copy(email = it)) },
+          label = { Text(text = "Email") },
+          isError = uiState.emailValid.not(),
+          supportingText = { Text("The entered email address is in the wrong format") },
+          maxLines = 1,
+          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        )
+
+        ErrorAwareOutlinedTextField(
+          modifier = Modifier.padding(top = 12.dp),
+          value = uiState.authSignInInfo.password,
+          onValueChange = { updateUiState(uiState.authSignInInfo.copy(password = it)) },
+          label = { Text("Password") },
+          visualTransformation = PasswordVisualTransformation(),
+          isError = uiState.passwordValid.not(),
+          supportingText = { Text("Make sure the password is 8 characters long and includes a mix of lowercase and uppercase letters, numbers, and symbols") },
+          maxLines = 1,
+          keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        )
       }
 
-      LoadingStates.SUCCESS -> {
-        navigateToMe()
-      }
+      Column(
+        verticalArrangement = Arrangement.spacedBy(
+          space = 12.dp,
+          alignment = Alignment.CenterVertically
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
 
-      else                  -> {
-        Scaffold(modifier = Modifier
-          .nestedScroll(scrollBehavior.nestedScrollConnection)
-          .imePadding(),
-          topBar = {
-            CenterAlignedTopAppBar(title = {
-              Text("Sign in")
-            })
+        ) {
+        Button(
+          enabled = uiState.inputValid,
+          onClick = {
+            coroutineScope.launch {
+              keyboardController?.hide()
+              signInOnClick()
+            }
           },
-          snackbarHost = {
-            SnackbarHost(
-              hostState = uiState.snackbarHostState
-            )
-          }) { innerPadding ->
-          Column(
-            Modifier
-              .padding(top = innerPadding.calculateTopPadding())
-              .padding(horizontal = 16.dp)
-              .fillMaxWidth()
-              .verticalScroll(rememberScrollState())
-              .imePadding(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(
-              space = 32.dp,
-              alignment = Alignment.CenterVertically
-            ),
-          ) {
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          Text(text = "Sign in")
+        }
+        TextButton(onClick = { passwordResetOnClick() }) {
+          Text(text = "Reset my password")
+        }
+      }
 
-            // Google
-            GoogleAuthButton(onClick = {
-              coroutineScope.launch {
-                googleAuthOnClick()
-              }
-            })
+      Divider()
 
-            Divider()
+      Column(
+        verticalArrangement = Arrangement.spacedBy(
+          space = 12.dp,
+          alignment = Alignment.CenterVertically
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(
+          bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 16.dp
+        )
+      ) {
+        Text(text = "Don't have an account yet?")
 
-            Column(
-              verticalArrangement = Arrangement.spacedBy(
-                space = 12.dp,
-                alignment = Alignment.CenterVertically
-              ),
-              horizontalAlignment = Alignment.CenterHorizontally,
-
-              ) {
-              ErrorAwareOutlinedTextField(
-                value = uiState.authSignInInfo.email,
-                onValueChange = { updateUiState(uiState.authSignInInfo.copy(email = it)) },
-                label = { Text(text = "Email") },
-                isError = uiState.emailValid.not(),
-                supportingText = { Text("The entered email address is in the wrong format") },
-                maxLines = 1,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-              )
-
-              ErrorAwareOutlinedTextField(
-                modifier = Modifier.padding(top = 12.dp),
-                value = uiState.authSignInInfo.password,
-                onValueChange = { updateUiState(uiState.authSignInInfo.copy(password = it)) },
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                isError = uiState.passwordValid.not(),
-                supportingText = { Text("Make sure the password is 8 characters long and includes a mix of lowercase and uppercase letters, numbers, and symbols") },
-                maxLines = 1,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-              )
-            }
-
-            Column(
-              verticalArrangement = Arrangement.spacedBy(
-                space = 12.dp,
-                alignment = Alignment.CenterVertically
-              ),
-              horizontalAlignment = Alignment.CenterHorizontally,
-
-              ) {
-              Button(
-                enabled = uiState.inputValid,
-                onClick = {
-                  coroutineScope.launch {
-                    keyboardController?.hide()
-                    signInOnClick()
-                  }
-                },
-                modifier = Modifier.fillMaxWidth()
-              ) {
-                Text(text = "Sign in")
-              }
-              TextButton(onClick = { passwordResetOnClick() }) {
-                Text(text = "Reset my password")
-              }
-            }
-
-            Divider()
-
-            Column(
-              verticalArrangement = Arrangement.spacedBy(
-                space = 12.dp,
-                alignment = Alignment.CenterVertically
-              ),
-              horizontalAlignment = Alignment.CenterHorizontally,
-              modifier = Modifier.padding(
-                bottom = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding() + 16.dp
-              )
-            ) {
-              Text(text = "Don't have an account yet?")
-
-              OutlinedButton(onClick = { signUpOnClick() }) {
-                Text(text = "Sign up")
-              }
-            }
-          }
+        OutlinedButton(onClick = { signUpOnClick() }) {
+          Text(text = "Sign up")
         }
       }
     }
   }
 
-
+  AnimatedVisibility(
+    visible = uiState.loadingState === LoadingStates.LOADING,
+    enter = fadeIn(),
+    exit = fadeOut()
+  ) {
+    LoadingOverlay()
+  }
 }
 
 

@@ -2,11 +2,13 @@ package com.oreomrone.locallens.data.repositories.profile
 
 import android.util.Log
 import com.oreomrone.locallens.data.dto.ProfileDto
+import com.oreomrone.locallens.data.utils.BuildProfileImageUrl
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.storage.Storage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -68,16 +70,23 @@ class ProfileRepositoryImpl @Inject constructor(
     imageUrl: String?
   ): Pair<Boolean, String> = withContext(Dispatchers.IO) {
     return@withContext try {
+
+
+      //region Upload image to storage and get URL
       var imageBucketUrl: String? = null
 
-      if (imageFile != null) {
+      if (imageFile != null && imageFile.isNotEmpty()) {
         val imageFileName = "${id}.png"
-        imageBucketUrl = storage["profile_images"].upload(
-          path = imageFileName,
-          data = imageFile,
-          upsert = true
-        )
+        imageBucketUrl = async {
+          storage["profiles"].upload(
+            path = imageFileName,
+            data = imageFile,
+            upsert = true
+          )
+        }.await()
+        imageBucketUrl = BuildProfileImageUrl("${table}/${imageFileName}")
       }
+      //endregion
 
       postgrest.from(table).update({
         set(
@@ -98,7 +107,7 @@ class ProfileRepositoryImpl @Inject constructor(
         )
         set(
           "avatar_url",
-          imageBucketUrl ?: imageUrl?: ""
+          imageBucketUrl ?: imageUrl ?: ""
         )
       }) {
         filter {
@@ -121,6 +130,38 @@ class ProfileRepositoryImpl @Inject constructor(
         false,
         e.message ?: "An error occurred. Please try again."
       )
+    }
+  }
+
+  override suspend fun validateUsernameUnique(username: String): Boolean {
+    return try {
+      if (username.isBlank()) return false
+      if (username.isEmpty()) return false
+      if (username.contains(" ")) return false
+
+      val res = postgrest.from(table).select {
+        filter {
+          eq(
+            "username",
+            username
+          )
+        }
+      }.decodeSingleOrNull<ProfileDto>()
+
+      if (res !== null) {
+        Log.e(
+          "ProfileRepositoryImpl",
+          "validateUsernameUnique:${res.id == auth.currentSessionOrNull()?.user?.id}")
+        auth.currentSessionOrNull()?.user?.id == res.id
+      } else {
+        true
+      }
+    } catch (e: RestException) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "validateUsernameUnique: $e"
+      )
+      false
     }
   }
 }

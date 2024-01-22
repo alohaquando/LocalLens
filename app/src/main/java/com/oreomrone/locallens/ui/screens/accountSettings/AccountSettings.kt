@@ -72,10 +72,12 @@ private fun AccountSettings(
   val coroutineScope = rememberCoroutineScope()
 
   Scaffold(
-    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection).imePadding(),
+    modifier = Modifier
+      .nestedScroll(scrollBehavior.nestedScrollConnection)
+      .imePadding(),
     topBar = {
       CenterAlignedTopAppBar(
-  
+
         title = {
           Text(text = "Account settings")
         },
@@ -109,7 +111,8 @@ private fun AccountSettings(
         )
       }
 
-      ListItem(headlineContent = { Text("Change password") },
+      ListItem(
+        headlineContent = { Text("Change password") },
         trailingContent = {
           Icon(
             Icons.Default.ArrowRight,
@@ -118,7 +121,8 @@ private fun AccountSettings(
         },
         modifier = Modifier.clickable(onClick = changePasswordOnClick)
       )
-      ListItem(headlineContent = { Text("Change email") },
+      ListItem(
+        headlineContent = { Text("Change email") },
         trailingContent = {
           Icon(
             Icons.Default.ArrowRight,
@@ -127,8 +131,14 @@ private fun AccountSettings(
         },
         modifier = Modifier.clickable(onClick = changeEmailOnClick)
       )
-      Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-      ListItem(headlineContent = { Text("Support") },
+      Divider(
+        modifier = Modifier.padding(
+          horizontal = 16.dp,
+          vertical = 8.dp
+        )
+      )
+      ListItem(
+        headlineContent = { Text("Support") },
         trailingContent = {
           Icon(
             Icons.Default.ArrowRight,
@@ -137,7 +147,12 @@ private fun AccountSettings(
         },
         modifier = Modifier.clickable(onClick = supportOnClick)
       )
-      Divider(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+      Divider(
+        modifier = Modifier.padding(
+          horizontal = 16.dp,
+          vertical = 8.dp
+        )
+      )
       ListItem(
         headlineContent = {
           Text(

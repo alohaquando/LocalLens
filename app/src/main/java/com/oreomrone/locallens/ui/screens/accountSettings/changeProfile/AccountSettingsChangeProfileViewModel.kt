@@ -1,4 +1,4 @@
-package com.oreomrone.locallens.ui.screens.completeAccount
+package com.oreomrone.locallens.ui.screens.accountSettings.changeProfile
 
 import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
@@ -18,13 +18,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CompleteAccountProfileViewModel @Inject constructor(
+class AccountSettingsChangeProfileViewModel @Inject constructor(
   private val auth: Auth,
   private val authRepository: AuthRepository,
   private val profileRepository: ProfileRepository,
 ) : ViewModel() {
-  private val _uiState = MutableStateFlow(CompleteAccountProfileUiState())
-  val uiState: StateFlow<CompleteAccountProfileUiState> = _uiState.asStateFlow()
+  private val _uiState = MutableStateFlow(AccountSettingsChangeProfileUiState())
+  val uiState: StateFlow<AccountSettingsChangeProfileUiState> = _uiState.asStateFlow()
 
   //region Init & Database calls
   init {
@@ -58,7 +58,7 @@ class CompleteAccountProfileViewModel @Inject constructor(
     }
   }
 
-  suspend fun performComplete() {
+  suspend fun performSave() {
     try {
       _uiState.update { currentState ->
         currentState.copy(
@@ -100,12 +100,6 @@ class CompleteAccountProfileViewModel @Inject constructor(
           loadingState = LoadingStates.ERROR
         )
       }
-    }
-  }
-
-  suspend fun performSignOut() {
-    viewModelScope.launch {
-      authRepository.signOut()
     }
   }
   //endregion
@@ -154,6 +148,7 @@ class CompleteAccountProfileViewModel @Inject constructor(
         isPrivate = isPrivate
       )
     }
+    validateInput()
   }
 
   //region Image
@@ -181,14 +176,13 @@ class CompleteAccountProfileViewModel @Inject constructor(
   private fun validateInput() {
     _uiState.update { currentState ->
       currentState.copy(
-        inputValid = _uiState.value.nameValid && _uiState.value.bioValid && _uiState.value
-          .usernameValid && !_uiState.value.imageURL.isNullOrEmpty()
+        inputValid = _uiState.value.nameValid && _uiState.value.bioValid && _uiState.value.usernameValid && !_uiState.value.imageURL.isNullOrEmpty()
       )
     }
   }
 }
 
-data class CompleteAccountProfileUiState(
+data class AccountSettingsChangeProfileUiState(
   // Input
   val name: String = "",
   val username: String = "",

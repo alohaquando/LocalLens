@@ -9,7 +9,7 @@ import androidx.navigation.compose.rememberNavController
 import com.oreomrone.locallens.ui.screens.accountSettings.AccountSettings
 import com.oreomrone.locallens.ui.screens.accountSettings.changeEmail.AccountSettingsChangeEmailNew
 import com.oreomrone.locallens.ui.screens.accountSettings.changePassword.AccountSettingsChangePasswordNew
-import com.oreomrone.locallens.ui.screens.accountSettings.changeProfile.AccountSettingChangeProfile
+import com.oreomrone.locallens.ui.screens.accountSettings.changeProfile.AccountSettingsChangeProfile
 import com.oreomrone.locallens.ui.screens.accountSettings.support.Support
 import com.oreomrone.locallens.ui.screens.auth.AuthSignIn
 import com.oreomrone.locallens.ui.screens.auth.AuthSignUp
@@ -124,7 +124,7 @@ fun AppNavHost(
       popEnterTransition = popEnterHorizontalTransition,
       popExitTransition = popExitHorizontalTransition,
     ) {
-      AccountSettingChangeProfile(
+      AccountSettingsChangeProfile(
         backOnClick = { navController.popBackStack() },
       )
     }
@@ -156,7 +156,10 @@ fun AppNavHost(
           navController.popBackStack()
           navController.navigate(AppNavDests.AuthSignUp.name)
         },
-        navigateToMe = { navController.navigate(AppNavDests.Me.name) },
+        navigateToMe = {
+          navController.popBackStack()
+          navController.navigate(AppNavDests.Me.name)
+        },
       )
     }
 
@@ -171,6 +174,10 @@ fun AppNavHost(
         signInOnClick = {
           navController.popBackStack()
           navController.navigate(AppNavDests.AuthSignIn.name)
+        },
+        navigateToCompleteProfile = {
+          navController.popBackStack()
+          navController.navigate(AppNavDests.CompleteAccountProfile.name)
         },
       )
     }
@@ -220,7 +227,9 @@ fun AppNavHost(
       popEnterTransition = popEnterVerticalTransition,
       popExitTransition = popExitVerticalTransition
     ) {
-      CompleteAccountProfile(navigateToMe = { navController.navigate(AppNavDests.Me.name) })
+      CompleteAccountProfile(navigateToMe = {
+        navController.popBackStack()
+        navController.navigate(AppNavDests.Me.name) })
     }
     //endregion
 

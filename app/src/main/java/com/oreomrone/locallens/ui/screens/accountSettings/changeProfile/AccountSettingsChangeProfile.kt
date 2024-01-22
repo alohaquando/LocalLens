@@ -1,7 +1,9 @@
 package com.oreomrone.locallens.ui.screens.accountSettings.changeProfile
 
 import android.content.res.Configuration
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -17,17 +19,18 @@ import com.oreomrone.locallens.ui.components.layouts.ProfileInputLayout
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 
 @Composable
-fun AccountSettingChangeProfile(
+fun AccountSettingsChangeProfile(
   backOnClick: () -> Unit = {},
 ) {
-  val viewModel: AccountSettingChangeProfileViewModel = hiltViewModel()
+  val viewModel: AccountSettingsChangeProfileViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-  AccountSettingChangeProfile(
+  AccountSettingsChangeProfile(
     uiState = uiState,
     backOnClick = backOnClick,
     onNameChange = viewModel::onNameChange,
     onUsernameChange = viewModel::onUsernameChange,
+    onIsPrivateChange = viewModel::onIsPrivateChange,
     onBioChange = viewModel::onBioChange,
     onImageChange = viewModel::onImageChange,
     onImageRemove = viewModel::onImageRemove,
@@ -37,59 +40,64 @@ fun AccountSettingChangeProfile(
 }
 
 @Composable
-private fun AccountSettingChangeProfile(
-  uiState: AccountSettingChangeProfileUiState = AccountSettingChangeProfileUiState(),
+private fun AccountSettingsChangeProfile(
+  uiState: AccountSettingsChangeProfileUiState = AccountSettingsChangeProfileUiState(),
   backOnClick: () -> Unit = {},
   onNameChange: (String) -> Unit = {},
   onUsernameChange: (String) -> Unit = {},
   onBioChange: (String) -> Unit = {},
+  onIsPrivateChange: (Boolean) -> Unit = {},
   onImageChange: (String) -> Unit = {},
   onImageRemove: () -> Unit = {},
   onImageFileChange: (ByteArray) -> Unit = {},
   performSave: suspend () -> Unit = {},
 ) {
-  Crossfade(
-    targetState = uiState.loadingState,
-    label = "AccountSettingChangeProfile Crossfade"
+  ProfileInputLayout(
+    title = "Edit your profile",
+    navigationIcon = Icons.Default.ArrowBack,
+    submitButtonText = "Save",
+    username = uiState.username,
+    name = uiState.name,
+    bio = uiState.bio,
+    isPrivate = uiState.isPrivate,
+    imageURL = uiState.imageURL,
+    inputValid = uiState.inputValid,
+    usernameValid = uiState.usernameValid,
+    nameValid = uiState.nameValid,
+    bioValid = uiState.bioValid,
+    snackbarHostState = uiState.snackbarHostState,
+    navigationButtonOnClick = backOnClick,
+    onNameChange = onNameChange,
+    onUsernameChange = onUsernameChange,
+    onBioChange = onBioChange,
+    onIsPrivateChange = onIsPrivateChange,
+    onImageChange = onImageChange,
+    onImageRemove = onImageRemove,
+    onImageFileChange = onImageFileChange,
+    submitOnClick = performSave,
+  )
+
+  AnimatedVisibility(
+    visible = uiState.loadingState === LoadingStates.ERROR,
+    enter = fadeIn(),
+    exit = fadeOut()
   ) {
-    when (it) {
-      LoadingStates.LOADING -> {
-        LoadingOverlay()
-      }
+    ErrorOverlay(backOnClick = backOnClick)
+  }
 
-      LoadingStates.ERROR   -> {
-        ErrorOverlay(
-          backOnClick = backOnClick
-        )
-      }
+  AnimatedVisibility(
+    visible = uiState.loadingState === LoadingStates.LOADING,
+    enter = fadeIn(),
+    exit = fadeOut()
+  ) {
+    LoadingOverlay()
+  }
 
-      else                  -> {
-        ProfileInputLayout(
-          title = "Edit your profile",
-          navigationIcon = Icons.Default.ArrowBack,
-          submitButtonText = "Save",
-          username = uiState.username,
-          name = uiState.name,
-          bio = uiState.bio,
-          imageURL = uiState.imageURL,
-          inputValid = uiState.inputValid,
-          usernameValid = uiState.usernameValid,
-          nameValid = uiState.nameValid,
-          bioValid = uiState.bioValid,
-          snackbarHostState = uiState.snackbarHostState,
-          navigationButtonOnClick = backOnClick,
-          onNameChange = onNameChange,
-          onUsernameChange = onUsernameChange,
-          onBioChange = onBioChange,
-          onImageChange = onImageChange,
-          onImageRemove = onImageRemove,
-          onImageFileChange = onImageFileChange,
-          submitOnClick = performSave,
-        )
-      }
-    }
+  if (uiState.loadingState === LoadingStates.SUCCESS) {
+    backOnClick()
   }
 }
+
 
 @Preview(
   showBackground = true,
@@ -102,8 +110,8 @@ private fun AccountSettingChangeProfileHasInfoPreview(
 
 ) {
   LocalLensTheme {
-    AccountSettingChangeProfile(
-      uiState = AccountSettingChangeProfileUiState(
+    AccountSettingsChangeProfile(
+      uiState = AccountSettingsChangeProfileUiState(
         name = "Sheen Hahn",
         username = "the_sheenathan",
         bio = "I love to travel and take photos!",
@@ -124,7 +132,7 @@ private fun AccountSettingChangeProfilePreview(
 
 ) {
   LocalLensTheme {
-    AccountSettingChangeProfile()
+    AccountSettingsChangeProfile()
   }
 }
 

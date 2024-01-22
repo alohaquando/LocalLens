@@ -14,5 +14,7 @@ interface ProfileRepository {
     imageFile: ByteArray? = null,
     imageUrl: String? = null,
   ): Pair<Boolean, String>
+
+  suspend fun validateUsernameUnique(username: String): Boolean
 }
 

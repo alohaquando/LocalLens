@@ -7,15 +7,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
@@ -61,6 +64,7 @@ fun DetailsLayout(
   showBackButton: Boolean = false,
   backOnClick: () -> Unit = {},
   isLoading: Boolean = false,
+  isPrivate: Boolean = false,
   buttonsRowContent: @Composable () -> Unit = {},
   statsRowContent: @Composable () -> Unit = {},
   content: @Composable () -> Unit = {},
@@ -191,7 +195,9 @@ fun DetailsLayout(
             }
 
             Column(
-              modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
               verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
               if (ternaryText.isNotBlank()) {
@@ -200,8 +206,35 @@ fun DetailsLayout(
                   textAlign = TextAlign.Center,
                   maxLines = 3,
                   overflow = TextOverflow.Ellipsis,
-                  modifier = Modifier.fillMaxWidth()
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                 )
+              }
+
+              if (isPrivate) {
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.CenterHorizontally
+                  )
+                ) {
+                  Icon(
+                    imageVector = Icons.Rounded.Lock,
+                    contentDescription = "Lock",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                  )
+                  Text(
+                    text = "Private",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                  )
+                }
               }
 
               // Button Row

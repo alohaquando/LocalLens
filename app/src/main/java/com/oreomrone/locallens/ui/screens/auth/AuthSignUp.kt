@@ -1,30 +1,27 @@
 package com.oreomrone.locallens.ui.screens.auth
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -43,24 +40,61 @@ import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.ui.components.ErrorAwareOutlinedTextField
 import com.oreomrone.locallens.ui.components.GoogleAuthButton
+import com.oreomrone.locallens.ui.components.LoadingOverlay
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
+import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
+import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import kotlinx.coroutines.launch
 
 @Composable
 fun AuthSignUp(
   signInOnClick: () -> Unit = {},
+  navigateToCompleteProfile: () -> Unit = {},
 ) {
   val viewModel: AuthSignUpViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+  val coroutineScope = rememberCoroutineScope()
+  val googleAuthAction =
+    viewModel.composeAuth.rememberSignInWithGoogle(onResult = { result -> //optional error handling
+      when (result) {
+        is NativeSignInResult.Success      -> {
+          coroutineScope.launch {
+            viewModel.showSnackBar("Signed up with Google successfully")
+            viewModel.setLoading()
+            navigateToCompleteProfile()
+          }
+        }
+
+
+        is NativeSignInResult.Error        -> {
+          coroutineScope.launch {
+            viewModel.performGoogleSignIn()
+          }
+        }
+
+        is NativeSignInResult.NetworkError -> {
+          coroutineScope.launch {
+            viewModel.showSnackBar("A network error happened")
+          }
+        }
+
+        else                               -> {
+
+        }
+      }
+    })
+
   AuthSignUp(
     uiState = uiState,
     updateUiState = viewModel::updateUiState,
-    googleAuthOnClick = viewModel::onSignUpWithGoogle,
+    googleAuthOnClick = { googleAuthAction.startFlow() },
     signUpOnClick = viewModel::onSignUp,
-    signInOnClick = signInOnClick
+    signInOnClick = signInOnClick,
+    navigateToCompleteProfile = navigateToCompleteProfile
   )
 }
 
@@ -75,36 +109,24 @@ private fun AuthSignUp(
   googleAuthOnClick: suspend () -> Unit = {},
   signUpOnClick: suspend () -> Unit = {},
   signInOnClick: () -> Unit = {},
+  navigateToCompleteProfile: () -> Unit = {},
 ) {
   val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
   val coroutineScope = rememberCoroutineScope()
   val keyboardController = LocalSoftwareKeyboardController.current
 
-  if (uiState.isLoading) {
-    Surface(
-      modifier = Modifier.fillMaxSize(),
-      color = MaterialTheme.colorScheme.surface
-    ) {
-      Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-      ) {
-        CircularProgressIndicator(
-          modifier = Modifier.width(56.dp),
-          color = MaterialTheme.colorScheme.secondary,
-          trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-        )
-      }
-    }
+  if (uiState.loadingState === LoadingStates.SUCCESS) {
+    navigateToCompleteProfile()
   }
 
   Scaffold(
-    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection).imePadding(),
+    modifier = Modifier
+      .nestedScroll(scrollBehavior.nestedScrollConnection)
+      .imePadding(),
     topBar = {
-      CenterAlignedTopAppBar(
-        title = {
-          Text("Join LocalLens")
-        })
+      CenterAlignedTopAppBar(title = {
+        Text("Join LocalLens")
+      })
     },
     snackbarHost = {
       SnackbarHost(
@@ -218,6 +240,14 @@ private fun AuthSignUp(
         }
       }
     }
+  }
+
+  AnimatedVisibility(
+    visible = uiState.loadingState === LoadingStates.LOADING,
+    enter = fadeIn(),
+    exit = fadeOut()
+  ) {
+    LoadingOverlay()
   }
 }
 

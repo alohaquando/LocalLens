@@ -30,9 +30,11 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -73,6 +75,8 @@ fun ProfileInputLayout(
   username: String,
   name: String,
   bio: String,
+  isPrivate: Boolean = false,
+  onIsPrivateChange: (Boolean) -> Unit = {},
   imageURL: String?,
   inputValid: Boolean,
   usernameValid: Boolean,
@@ -109,7 +113,9 @@ fun ProfileInputLayout(
 
   val contentResolver = LocalContext.current.contentResolver
 
-  Scaffold(modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection).imePadding(),
+  Scaffold(modifier = Modifier
+    .nestedScroll(scrollBehavior.nestedScrollConnection)
+    .imePadding(),
     topBar = {
       CenterAlignedTopAppBar(
         title = {
@@ -134,7 +140,9 @@ fun ProfileInputLayout(
         enabled = inputValid,
         onClick = {
           coroutineScope.launch {
-            if (Uri.parse(imageURL).host?.contains("supabase") == true) {
+            keyboardController?.hide()
+
+            if (Uri.parse(imageURL).scheme?.contains("https") == true) {
               onImageFileChange(byteArrayOf())
             } else {
               val image = uriToByteArray(
@@ -143,8 +151,8 @@ fun ProfileInputLayout(
               )
               onImageFileChange(image)
             }
+
             submitOnClick()
-            navigationButtonOnClick() // Go back after submit
           }
         })
     },
@@ -158,7 +166,6 @@ fun ProfileInputLayout(
         .padding(
           top = it.calculateTopPadding()
         )
-        .padding(horizontal = 16.dp)
         .imePadding(),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(
@@ -172,13 +179,15 @@ fun ProfileInputLayout(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
       ) {
-        Image(modifier = Modifier
+        Image(
+          modifier = Modifier
           .fillMaxWidth()
           .animateContentSize()
           .aspectRatio(if (imageURL.isNullOrBlank()) 2f else 1f)
           .clip(
             RoundedCornerShape(32.dp)
           ),
+          paddingModifier = Modifier.padding(horizontal = 16.dp),
           model = imageURL,
           onClick = {
             galleryLauncher.launch("image/*")
@@ -232,7 +241,9 @@ fun ProfileInputLayout(
             contentDescription = "Username",
           )
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp),
         placeholder = {
           Text(
             text = "Username"
@@ -252,7 +263,9 @@ fun ProfileInputLayout(
         },
         isError = !nameValid,
         onValueChange = { onNameChange(it) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp),
         placeholder = {
           Text(
             text = "Name"
@@ -272,7 +285,9 @@ fun ProfileInputLayout(
         },
         isError = !bioValid,
         onValueChange = { onBioChange(it) },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp),
         placeholder = {
           Text(
             text = "Bio"
@@ -283,6 +298,25 @@ fun ProfileInputLayout(
             text = "Bio"
           )
         })
+
+      ListItem(
+        headlineContent = {
+          Text(
+            text = "Private account"
+          )
+        },
+        supportingContent = {
+          Text(
+            text = "Other people will have to request before they can follow you"
+          )
+        },
+        trailingContent = {
+          Switch(
+            checked = isPrivate,
+            onCheckedChange = onIsPrivateChange
+          )
+        },
+      )
 
       Spacer(modifier = Modifier.height(it.calculateBottomPadding()))
     }

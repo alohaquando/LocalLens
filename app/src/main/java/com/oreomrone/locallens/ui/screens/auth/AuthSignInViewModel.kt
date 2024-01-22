@@ -26,7 +26,7 @@ class AuthSignInViewModel @Inject constructor(
   private val _uiState = MutableStateFlow(AuthSignInUiState())
   val uiState: StateFlow<AuthSignInUiState> = _uiState.asStateFlow()
 
-   fun updateUiState(authSignInInfo: AuthSignInInfo) {
+  fun updateUiState(authSignInInfo: AuthSignInInfo) {
     _uiState.update { currentState ->
       currentState.copy(
         authSignInInfo = authSignInInfo,
@@ -45,11 +45,32 @@ class AuthSignInViewModel @Inject constructor(
 
   suspend fun performSignIn() {
     viewModelScope.launch {
-      // TODO
+      _uiState.update { currentState ->
+        currentState.copy(
+          loadingState = LoadingStates.LOADING
+        )
+      }
 
-      _uiState.value.snackbarHostState.showSnackbar(
-        message = "Something",
+      val res = authRepository.signIn(
+        _uiState.value.authSignInInfo.email,
+        _uiState.value.authSignInInfo.password
       )
+
+      if (res.first) {
+        _uiState.update { currentState ->
+          currentState.copy(
+            loadingState = LoadingStates.SUCCESS
+          )
+        }
+        _uiState.value.snackbarHostState.showSnackbar(res.second)
+      } else {
+        _uiState.update { currentState ->
+          currentState.copy(
+            loadingState = LoadingStates.ERROR
+          )
+        }
+        _uiState.value.snackbarHostState.showSnackbar(res.second)
+      }
     }
   }
 
@@ -64,6 +85,14 @@ class AuthSignInViewModel @Inject constructor(
       message = message,
     )
   }
+
+  fun setLoading() {
+    _uiState.update { currentState ->
+      currentState.copy(
+        loadingState = LoadingStates.LOADING
+      )
+    }
+  }
 }
 
 data class AuthSignInUiState(
@@ -71,7 +100,7 @@ data class AuthSignInUiState(
   val emailValid: Boolean = false,
   val passwordValid: Boolean = false,
   val inputValid: Boolean = false,
-  val loadingStates: LoadingStates = LoadingStates.IDLE,
+  val loadingState: LoadingStates = LoadingStates.IDLE,
   val snackbarHostState: SnackbarHostState = SnackbarHostState()
 )
 

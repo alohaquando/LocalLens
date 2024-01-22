@@ -24,9 +24,9 @@ import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.oreomrone.locallens.ui.components.layouts.DetailsLayout
 import com.oreomrone.locallens.ui.components.Post
 import com.oreomrone.locallens.ui.components.StatItemButton
+import com.oreomrone.locallens.ui.components.layouts.DetailsLayout
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.PostViewModel
 import com.oreomrone.locallens.ui.utils.SampleData
@@ -104,6 +104,7 @@ private fun Me(
     ternaryText = uiState.user?.bio ?: "",
     backOnClick = backOnClick,
     isLoading = uiState.user == null,
+    isPrivate = uiState.user?.isPrivate ?: false,
     buttonsRowContent = {
       Row(
         modifier = Modifier

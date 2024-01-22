@@ -29,6 +29,7 @@ import com.oreomrone.locallens.ui.utils.conditional
 @Composable
 fun Image(
   modifier: Modifier = Modifier,
+  paddingModifier: Modifier = Modifier,
   boxModifier: Modifier = Modifier,
   imageModifier: Modifier = Modifier,
   model: Any? = null,
@@ -42,6 +43,7 @@ fun Image(
   }
   Box(
     modifier = Modifier
+      .then(paddingModifier)
       .then(modifier)
       .then(boxModifier)
       .background(background)
@@ -50,7 +52,8 @@ fun Image(
       },
     contentAlignment = Alignment.Center
   ) {
-    if (model != null) {
+
+    if (model !== "" && model !== null) {
       val request =
         ImageRequest.Builder(LocalContext.current).data(model).allowHardware(false).build()
       AsyncImage(
@@ -75,7 +78,7 @@ fun Image(
           imageVector = Icons.Rounded.Image,
           contentDescription = "Image placeholder",
           tint = MaterialTheme.colorScheme.onSecondaryContainer,
-          modifier = Modifier.size(16.dp)
+          modifier = Modifier.size(32.dp)
         )
       }
     }
@@ -88,5 +91,5 @@ fun Image(
 )
 @Composable
 private fun ImagePreview() {
-  Image()
+  Image(model = "")
 }
