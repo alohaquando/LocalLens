@@ -118,7 +118,7 @@ private fun DetailsPlace(
               StatItemButton(
                 modifier = Modifier.weight(1f),
                 onClick = { },
-                value = uiState.place?.posts?.size.toString(), // TODO
+                value = uiState.place?.posts?.size.toString(),
                 label = "Posts",
               )
             }
@@ -134,7 +134,7 @@ private fun DetailsPlace(
                 date = post.timestamp,
                 favorites = post.favorites.size,
                 postImageModel = post.image,
-                userImageModel = post.user?.image.toString(), // TODO
+                userImageModel = post.user?.image.toString(),
                 isFavorite = false,
                 showDivider = true,
                 showUser = true,
