@@ -250,6 +250,9 @@ fun DetailsLayout(
               content()
             }
 
+            Spacer(modifier = Modifier.height(height = 64.dp))
+
+
             Spacer(modifier = Modifier.height(innerPadding.calculateBottomPadding()))
           }
         }

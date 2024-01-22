@@ -18,5 +18,7 @@ interface PostRepository {
   ): Pair<Boolean, String>
 
   suspend fun getPostsByPlaceId(placeId: String): List<PostDto>
+
+  suspend fun getPostsByUserId(userId: String): List<PostDto>
 }
 

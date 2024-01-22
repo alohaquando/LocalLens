@@ -3,8 +3,10 @@ package com.oreomrone.locallens.ui.screens.me
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.data.repositories.profile.ProfileRepository
 import com.oreomrone.locallens.domain.User
+import com.oreomrone.locallens.domain.dtoToDomain.toPost
 import com.oreomrone.locallens.domain.dtoToDomain.toUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.jan.supabase.gotrue.Auth
@@ -18,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MeViewModel @Inject constructor(
   private val profileRepository: ProfileRepository,
+  private val postRepository: PostRepository,
   private val auth: Auth,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(MeUiState())
@@ -25,7 +28,7 @@ class MeViewModel @Inject constructor(
 
   init {
     viewModelScope.launch {
-      auth.currentSessionOrNull()?.user?.let {
+      auth.currentSessionOrNull()?.user?.let { it ->
         val profile = profileRepository.getProfileById(it.id)
         val user = profile?.toUser()
 
@@ -41,6 +44,9 @@ class MeViewModel @Inject constructor(
           }
 
           false -> {
+            val posts = postRepository.getPostsByUserId(user!!.id).map { it.toPost() }
+            user.posts = posts
+
             _uiState.update { currentState ->
               currentState.copy(user = user)
             }
@@ -49,14 +55,6 @@ class MeViewModel @Inject constructor(
       }
     }
   }
-
-  fun updateUiState(uiState: MeUiState) {
-    viewModelScope.launch {
-      _uiState.update { uiState }
-    }
-  }
-
-
 }
 
 data class MeUiState(

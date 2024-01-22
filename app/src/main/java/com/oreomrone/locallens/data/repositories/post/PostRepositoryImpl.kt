@@ -26,7 +26,7 @@ class PostRepositoryImpl @Inject constructor(
         "PostRepositoryImpl",
         "getAllPost: $res"
       )
-      res
+      res.sortedByDescending { it.timestamp}
     } catch (e: RestException) {
       Log.e(
         "PostRepositoryImpl",
@@ -70,11 +70,39 @@ class PostRepositoryImpl @Inject constructor(
         "PostRepositoryImpl",
         "getPostsByPlaceId: $res"
       )
-      res
+      res.sortedByDescending { it.timestamp}
     } catch (e: RestException) {
       Log.e(
         "PostRepositoryImpl",
         "getPostsByPlaceId: $e"
+      )
+      emptyList()
+    }
+  }
+
+  override suspend fun getPostsByUserId(userId: String): List<PostDto> {
+    return try {
+      val res = postgrest.from(table).select(
+        Columns.raw(
+          """*,places(*),profiles!posts_owner_fkey(*)""".cleanQueryString()
+        )
+      ) {
+        filter {
+          eq(
+            "owner",
+            userId
+          )
+        }
+      }.decodeList<PostDto>()
+      Log.d(
+        "PostRepositoryImpl",
+        "getPostsByUserId: $res"
+      )
+      res.sortedByDescending { it.timestamp}
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPostsByUserId: $e"
       )
       emptyList()
     }

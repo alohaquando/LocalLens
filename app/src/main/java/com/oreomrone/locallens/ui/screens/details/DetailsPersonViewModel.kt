@@ -4,10 +4,16 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oreomrone.locallens.data.repositories.post.PostRepository
+import com.oreomrone.locallens.data.repositories.profile.ProfileRepository
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.Place
+import com.oreomrone.locallens.domain.Post
 import com.oreomrone.locallens.domain.User
+import com.oreomrone.locallens.domain.dtoToDomain.toPost
+import com.oreomrone.locallens.domain.dtoToDomain.toUser
 import com.oreomrone.locallens.ui.utils.SampleData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +21,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class DetailsPersonViewModel @Inject constructor(
+  private val profileRepository: ProfileRepository,
+  private val postRepository: PostRepository,
   savedStateHandle: SavedStateHandle
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(DetailsPersonUiState())
@@ -41,6 +50,9 @@ class DetailsPersonViewModel @Inject constructor(
         return@launch
       }
 
+      val posts = getPostsByUserId(id);
+      user.posts = posts
+
       _uiState.update { currentState ->
         currentState.copy(
           user = user,
@@ -51,7 +63,11 @@ class DetailsPersonViewModel @Inject constructor(
   }
 
   private suspend fun getUser(id: String) : User? {
-    return SampleData.sampleUser // TODO
+    return profileRepository.getProfileById(id)?.toUser()
+  }
+
+  private suspend fun getPostsByUserId(id: String): List<Post> {
+    return postRepository.getPostsByUserId(id).map { it.toPost() }
   }
 
   private fun logAndSetError(message: String) {
