@@ -11,5 +11,14 @@ interface PlaceRepository {
     latitude: Double,
     longitude: Double
   ): Pair<Boolean, String>
+
+  suspend fun getPlaceByAddress(address: String): PlaceDto?
+
+  suspend fun getOrCreatePlace(
+    name: String,
+    address: String,
+    latitude: Double,
+    longitude: Double
+  ): Pair<Boolean, String>
 }
 
