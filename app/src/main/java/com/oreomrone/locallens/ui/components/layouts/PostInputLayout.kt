@@ -149,13 +149,6 @@ fun PostInputLayout(
       )
     }
 
-//  LaunchedEffect(Unit) {
-//    if (cameraPermissionState.status.isGranted && file !== null && imageChangeEnabled) {
-//      cameraLauncher.launch(uri)
-//    }
-//  }
-  //endregion
-
   //region UI-related
   // Scroll behavior
   val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -200,7 +193,7 @@ fun PostInputLayout(
         enabled = inputValid,
         onClick = {
           coroutineScope.launch {
-            if (Uri.parse(imageURL).host?.contains("firebase") == true) {
+            if (Uri.parse(imageURL).scheme?.contains("https") == true) {
               onImageFileChange(byteArrayOf())
             } else {
               val image = uriToByteArray(

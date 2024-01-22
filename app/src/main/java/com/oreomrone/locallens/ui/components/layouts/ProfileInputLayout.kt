@@ -1,5 +1,6 @@
 package com.oreomrone.locallens.ui.components.layouts
 
+import android.Manifest
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -56,16 +57,23 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.oreomrone.locallens.ui.components.BottomButtonBar
 import com.oreomrone.locallens.ui.components.ErrorAwareOutlinedTextField
 import com.oreomrone.locallens.ui.components.Image
+import com.oreomrone.locallens.ui.components.ImageSourceSelectSheet
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.uriToByteArray
 import kotlinx.coroutines.launch
+import java.io.File
 
 @OptIn(
   ExperimentalMaterial3Api::class,
-  ExperimentalComposeUiApi::class
+  ExperimentalComposeUiApi::class,
+  ExperimentalPermissionsApi::class
 )
 @Composable
 fun ProfileInputLayout(
@@ -102,6 +110,10 @@ fun ProfileInputLayout(
 
   var showAlertDialog by remember { mutableStateOf(false) }
 
+  // Context
+  val context = LocalContext.current
+
+  //region Gallery functions
   val galleryLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
       uri?.let {
@@ -112,6 +124,34 @@ fun ProfileInputLayout(
     }
 
   val contentResolver = LocalContext.current.contentResolver
+  //endregion
+
+  //region Camera functions
+  val cameraPermissionState = rememberPermissionState(
+    Manifest.permission.CAMERA
+  )
+
+  val file = File(
+    context.cacheDir,
+    "post_image_${System.currentTimeMillis()}.png"
+  )
+
+  val uri = FileProvider.getUriForFile(
+    context,
+    context.packageName + ".provider",
+    file
+  )
+
+  val cameraLauncher =
+    rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { _ ->
+      onImageFileChange(file.readBytes())
+      onImageChange(
+        uri.toString()
+      )
+    }
+
+  // Image source select sheet
+  var showImageSourceSheet by remember { mutableStateOf(false) }
 
   Scaffold(modifier = Modifier
     .nestedScroll(scrollBehavior.nestedScrollConnection)
@@ -179,8 +219,7 @@ fun ProfileInputLayout(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
       ) {
-        Image(
-          modifier = Modifier
+        Image(modifier = Modifier
           .fillMaxWidth()
           .animateContentSize()
           .aspectRatio(if (imageURL.isNullOrBlank()) 2f else 1f)
@@ -190,11 +229,11 @@ fun ProfileInputLayout(
           paddingModifier = Modifier.padding(horizontal = 16.dp),
           model = imageURL,
           onClick = {
-            galleryLauncher.launch("image/*")
+            showImageSourceSheet = true
           })
         Row {
           if (imageURL.isNullOrBlank()) {
-            TextButton(onClick = { galleryLauncher.launch("image/*") }) {
+            TextButton(onClick = { showImageSourceSheet = true }) {
               Icon(
                 imageVector = Icons.Rounded.Add,
                 contentDescription = "Add"
@@ -202,7 +241,7 @@ fun ProfileInputLayout(
               Text(text = "Add image")
             }
           } else {
-            TextButton(onClick = { galleryLauncher.launch("image/*") }) {
+            TextButton(onClick = { showImageSourceSheet = true }) {
               Icon(
                 imageVector = Icons.Outlined.Image,
                 contentDescription = "Change",
@@ -350,6 +389,24 @@ fun ProfileInputLayout(
           }) {
             Text("Stay and continue")
           }
+        })
+    }
+
+    if (showImageSourceSheet) {
+      ImageSourceSelectSheet(onDismissRequest = { showImageSourceSheet = false },
+        cameraOnClick = {
+          if (cameraPermissionState.status.isGranted) {
+            cameraLauncher.launch(uri)
+          } else {
+            cameraPermissionState.launchPermissionRequest()
+          }
+        },
+        cameraPermissionText = when {
+          cameraPermissionState.status.isGranted -> ""
+          else                                   -> "Camera permission required"
+        },
+        galleryOnClick = {
+          galleryLauncher.launch("image/*")
         })
     }
   }
