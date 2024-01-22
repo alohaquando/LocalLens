@@ -22,7 +22,7 @@ class TestViewModel @Inject constructor(
 
   init {
     viewModelScope.launch {
-//      postRepository.getAllPost()
+//      postRepository.getPostsByPlaceId("f7e2dfbc-bc77-4acf-82fb-8e14b412c395")
     }
   }
 }

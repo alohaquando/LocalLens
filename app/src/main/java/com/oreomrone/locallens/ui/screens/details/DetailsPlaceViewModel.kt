@@ -4,10 +4,14 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.oreomrone.locallens.data.repositories.place.PlaceRepository
+import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.Place
 import com.oreomrone.locallens.domain.Post
-import com.oreomrone.locallens.ui.utils.SampleData
+import com.oreomrone.locallens.domain.dtoToDomain.toPlace
+import com.oreomrone.locallens.domain.dtoToDomain.toPost
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +19,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class DetailsPlaceViewModel @Inject constructor(
+  private val placeRepository: PlaceRepository,
+  private val postRepository: PostRepository,
   savedStateHandle: SavedStateHandle
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(DetailsPlaceUiState())
@@ -41,6 +48,9 @@ class DetailsPlaceViewModel @Inject constructor(
         return@launch
       }
 
+      val posts = getPostsByPlaceId(id);
+      place.posts = posts
+
       _uiState.update { currentState ->
         currentState.copy(
           place = place,
@@ -50,8 +60,12 @@ class DetailsPlaceViewModel @Inject constructor(
     }
   }
 
-  private suspend fun getPlace(id: String) : Place? {
-    return SampleData.samplePlace // TODO
+  private suspend fun getPlace(id: String): Place? {
+    return placeRepository.getPlace(id)?.toPlace()
+  }
+
+  private suspend fun getPostsByPlaceId(id: String): List<Post> {
+    return postRepository.getPostsByPlaceId(id).map { it.toPost() }
   }
 
   private fun logAndSetError(message: String) {

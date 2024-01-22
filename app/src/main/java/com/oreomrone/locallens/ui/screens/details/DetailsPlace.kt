@@ -94,7 +94,7 @@ private fun DetailsPlace(
       else -> {
         DetailsLayout(title = if (uiState.place != null) uiState.place.name else "",
           subtitle = uiState.place?.address ?: "",
-          image = uiState.place?.image ?: "",
+          image = uiState.place?.posts?.get(0)?.image ?: "",
           showBackButton = true,
           backOnClick = backOnClick,
           isLoading = uiState.place == null,
@@ -122,47 +122,47 @@ private fun DetailsPlace(
                 label = "Posts",
               )
             }
-          },
-          content = {
-            if (uiState.place != null) {
-              for (post in uiState.place.posts) {
-                Post(
-                  place = post.place.name,
-                  address = post.place.address,
-                  caption = post.caption,
-                  username = post.user?.username.toString(),
-                  date = post.timestamp,
-                  favorites = post.favorites.size,
-                  postImageModel = post.image,
-                  userImageModel = post.user?.image.toString(), // TODO
-                  isFavorite = false,
-                  showDivider = true,
-                  showUser = false,
-                  showMenuButton = false, // TODO: allow for superUser
-                  navigateOnClick = {
-                    navigateOnClick(
-                      post.place.latitude,
-                      post.place.longitude,
-                      post.place.name
-                    )
-                  },
-                  favoriteOnClick = {
-                    coroutineScope.launch {
-                      favoriteOnClick(post.id)
-                    }
-                  },
-                  placeOnClick = { },
-                  userOnClick = { userOnClick(post.user?.id.toString()) },
-                  editOnClick = { editOnClick(post.id) },
-                  deleteOnClick = {
-                    coroutineScope.launch {
-                      deleteOnClick(post.id)
-                    }
-                  },
-                )
-              }
+          }
+        ) {
+          if (uiState.place != null) {
+            for (post in uiState.place.posts) {
+              Post(
+                place = post.place.name,
+                address = post.place.address,
+                caption = post.caption,
+                username = post.user?.username.toString(),
+                date = post.timestamp,
+                favorites = post.favorites.size,
+                postImageModel = post.image,
+                userImageModel = post.user?.image.toString(), // TODO
+                isFavorite = false,
+                showDivider = true,
+                showUser = true,
+                showMenuButton = false, // TODO: allow for superUser
+                navigateOnClick = {
+                  navigateOnClick(
+                    post.place.latitude,
+                    post.place.longitude,
+                    post.place.name
+                  )
+                },
+                favoriteOnClick = {
+                  coroutineScope.launch {
+                    favoriteOnClick(post.id)
+                  }
+                },
+                placeOnClick = { },
+                userOnClick = { userOnClick(post.user?.id.toString()) },
+                editOnClick = { editOnClick(post.id) },
+                deleteOnClick = {
+                  coroutineScope.launch {
+                    deleteOnClick(post.id)
+                  }
+                },
+              )
             }
-          })
+          }
+        }
       }
     }
   }

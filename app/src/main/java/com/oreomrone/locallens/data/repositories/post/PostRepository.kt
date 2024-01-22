@@ -7,7 +7,6 @@ interface PostRepository {
  suspend fun getAllPost(): List<PostDto>
 
   suspend fun getPost(id: String): PostDto?
-
   suspend fun createPost(
     imageFile: ByteArray? = null,
     imageUrl: String? = null,
@@ -17,5 +16,7 @@ interface PostRepository {
     placeLatitude: Double,
     placeLongitude: Double
   ): Pair<Boolean, String>
+
+  suspend fun getPostsByPlaceId(placeId: String): List<PostDto>
 }
 

@@ -51,4 +51,32 @@ class PostRepositoryImpl @Inject constructor(
   ): Pair<Boolean, String> {
     TODO("Not yet implemented")
   }
+
+  override suspend fun getPostsByPlaceId(placeId: String): List<PostDto> {
+    return try {
+      val res = postgrest.from(table).select(
+        Columns.raw(
+          """*,places(*),profiles!posts_owner_fkey(*)""".cleanQueryString()
+        )
+      ) {
+        filter {
+          eq(
+            "place",
+            placeId
+          )
+        }
+      }.decodeList<PostDto>()
+      Log.d(
+        "PostRepositoryImpl",
+        "getPostsByPlaceId: $res"
+      )
+      res
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPostsByPlaceId: $e"
+      )
+      emptyList()
+    }
+  }
 }

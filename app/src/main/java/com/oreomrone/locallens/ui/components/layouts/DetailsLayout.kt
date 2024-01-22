@@ -60,7 +60,7 @@ fun DetailsLayout(
   title: String = "",
   subtitle: String = "",
   ternaryText: String = "",
-  image: String = "",
+  image: Any = "",
   showBackButton: Boolean = false,
   backOnClick: () -> Unit = {},
   isLoading: Boolean = false,
@@ -281,9 +281,9 @@ private fun DetailsLayoutPreview() {
         StatItemButton()
         StatItemButton()
         StatItemButton()
-      },
-      content = {
-        Post()
-      })
+      }
+    ) {
+      Post()
+    }
   }
 }

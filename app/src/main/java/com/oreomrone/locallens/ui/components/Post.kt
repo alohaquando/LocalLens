@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Navigation
-import androidx.compose.material.icons.rounded.ArrowCircleUp
 import androidx.compose.material.icons.rounded.Circle
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
@@ -40,19 +39,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
-import com.oreomrone.locallens.ui.utils.JsonTimestampToDateTime
+import com.oreomrone.locallens.ui.utils.jsonTimestampToDateTime
 import com.oreomrone.locallens.ui.utils.conditional
 
 @Composable
@@ -273,7 +270,7 @@ fun Post(
           verticalAlignment = Alignment.CenterVertically
         ) {
           Text(
-            text = JsonTimestampToDateTime(date),
+            text = jsonTimestampToDateTime(date),
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
           )
         }
@@ -395,7 +392,7 @@ private fun PostPreview() {
       isFavorite = true,
       favorites = 59659,
       username = "oreomrone_the_explorer",
-      date = "2024-01-22T10:26:45.49646+00:00",
+      date = "2024-01-22 13:03:58.590832+00",
       postImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
       userImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
 
@@ -415,7 +412,7 @@ fun PostPreviewShort() {
       showMenuButton = true,
       favorites = 59659,
       username = "oreomrone_the_explorer",
-      date = "2024-01-22T10:26:45.49646+00:00",
+      date = "2024-01-22 13:03:58.590832+00",
       postImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
       userImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
 
