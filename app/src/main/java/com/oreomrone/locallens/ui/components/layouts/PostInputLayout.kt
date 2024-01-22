@@ -1,6 +1,5 @@
 package com.oreomrone.locallens.ui.components.layouts
 
-import android.Manifest
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -30,7 +29,10 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -59,20 +61,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.oreomrone.locallens.domain.Place
+import com.oreomrone.locallens.domain.PostVisibilities
 import com.oreomrone.locallens.ui.components.BottomButtonBar
 import com.oreomrone.locallens.ui.components.ErrorAwareOutlinedTextField
 import com.oreomrone.locallens.ui.components.Image
-import com.oreomrone.locallens.ui.components.ImageSourceSelectSheet
 import com.oreomrone.locallens.ui.components.PlaceSearchSheet
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.uriToByteArray
 import kotlinx.coroutines.launch
 import java.io.File
+import java.util.Locale
 
 @OptIn(
   ExperimentalMaterial3Api::class,
@@ -106,6 +106,8 @@ fun PostInputLayout(
   placeResultOnClick: (Place) -> Unit = {},
   onPlaceSearchEnter: () -> Unit = {},
   selectedPlace: Place? = null,
+  visibility: String = PostVisibilities.PUBLIC.name,
+  onVisibilityChange: (String) -> Unit = {},
 ) {
   // Context
   val context = LocalContext.current
@@ -126,27 +128,27 @@ fun PostInputLayout(
   //endregion
 
   //region Camera functions
-  val cameraPermissionState = rememberPermissionState(
-    Manifest.permission.CAMERA
-  )
+//  val cameraPermissionState = rememberPermissionState(
+//    Manifest.permission.CAMERA
+//  )
 
   val file = File(
     context.cacheDir,
     "post_image_${System.currentTimeMillis()}.png"
   )
 
-  val uri = FileProvider.getUriForFile(
-    context,
-    context.packageName + ".provider",
-    file
-  )
+//  val uri = FileProvider.getUriForFile(
+//    context,
+//    context.packageName + ".provider",
+//    file
+//  )
 
   val cameraLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { _ ->
       onImageFileChange(file.readBytes())
-      onImageChange(
-        uri.toString()
-      )
+//      onImageChange(
+////        uri.toString()
+//      )
     }
 
   //region UI-related
@@ -164,6 +166,9 @@ fun PostInputLayout(
 
   // Place search sheet
   var showPlaceSearchSheet by remember { mutableStateOf(false) }
+
+  // Visibility menu
+  var showVisibilityMenu by remember { mutableStateOf(false) }
   //endregion
 
   Scaffold(modifier = Modifier
@@ -334,7 +339,7 @@ fun PostInputLayout(
         onValueChange = { onCaptionChange(it) },
         modifier = Modifier
           .fillMaxWidth()
-          .height(240.dp),
+          .height(164.dp),
         placeholder = {
           Text(
             text = "Caption"
@@ -345,6 +350,77 @@ fun PostInputLayout(
             text = "Caption"
           )
         })
+
+      val visibilityOptions = PostVisibilities.entries.map { it.name }
+
+      ExposedDropdownMenuBox(
+        expanded = showVisibilityMenu,
+        onExpandedChange = {
+          showVisibilityMenu = !showVisibilityMenu
+        }) {
+        OutlinedTextField(
+          readOnly = true,
+          value = visibility.lowercase().replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase(Locale.ROOT)
+            else it.toString()
+          },
+          onValueChange = { },
+          label = { Text("Visible to") },
+          placeholder = { Text("Visible to") },
+          trailingIcon = {
+            ExposedDropdownMenuDefaults.TrailingIcon(
+              expanded = showVisibilityMenu
+            )
+          },
+          modifier = Modifier
+            .menuAnchor()
+            .fillMaxWidth(),
+          supportingText = {
+            when (visibility) {
+              PostVisibilities.PUBLIC.name  -> {
+                Text(
+                  text = "Anyone can see this post"
+                )
+              }
+
+              PostVisibilities.PRIVATE.name -> {
+                Text(
+                  text = "Only you and your follower can see this post"
+                )
+              }
+
+              PostVisibilities.ME.name      -> {
+                Text(
+                  text = "Only you can see this post"
+                )
+              }
+
+              else                          -> {
+                Text(
+                  text = ""
+                )
+              }
+            }
+          }
+        )
+        ExposedDropdownMenu(
+          expanded = showVisibilityMenu,
+          onDismissRequest = {
+            showVisibilityMenu = false
+          }) {
+          visibilityOptions.forEach { selectionOption ->
+            DropdownMenuItem(
+              onClick = {
+                onVisibilityChange(selectionOption)
+                showVisibilityMenu = false
+              },
+              text = {
+                Text(text = selectionOption.lowercase().replaceFirstChar { if (it.isLowerCase()) it
+                  .titlecase(Locale.ROOT) else it.toString() })
+              })
+          }
+        }
+      }
 
       Spacer(modifier = Modifier.height(it.calculateBottomPadding()))
     }
@@ -381,21 +457,21 @@ fun PostInputLayout(
 
 
     if (showImageSourceSheet) {
-      ImageSourceSelectSheet(onDismissRequest = { showImageSourceSheet = false },
-        cameraOnClick = {
-          if (cameraPermissionState.status.isGranted) {
-            cameraLauncher.launch(uri)
-          } else {
-            cameraPermissionState.launchPermissionRequest()
-          }
-        },
-        cameraPermissionText = when {
-          cameraPermissionState.status.isGranted -> ""
-          else                                   -> "Camera permission required"
-        },
-        galleryOnClick = {
-          galleryLauncher.launch("image/*")
-        })
+//      ImageSourceSelectSheet(onDismissRequest = { showImageSourceSheet = false },
+//        cameraOnClick = {
+//          if (cameraPermissionState.status.isGranted) {
+//            cameraLauncher.launch(uri)
+//          } else {
+//            cameraPermissionState.launchPermissionRequest()
+//          }
+//        },
+//        cameraPermissionText = when {
+//          cameraPermissionState.status.isGranted -> ""
+//          else                                   -> "Camera permission required"
+//        },
+//        galleryOnClick = {
+//          galleryLauncher.launch("image/*")
+//        })
     }
 
     if (showPlaceSearchSheet) {

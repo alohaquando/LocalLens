@@ -4,7 +4,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oreomrone.locallens.data.repositories.placesAutocomplete.PlacesAutocompleteRepository
+import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.Place
+import com.oreomrone.locallens.domain.PostVisibilities
 import com.oreomrone.locallens.domain.dtoToDomain.asDomainModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +37,13 @@ class NewPostDetailsViewModel @Inject constructor(
     validateInput()
   }
 
+  fun onVisibilityChange(visibility: PostVisibilities) {
+    _uiState.update { currentState ->
+      currentState.copy(
+        visibility = visibility
+      )
+    }
+  }
 
   //region Image
   fun onImageFileChange(imageFile: ByteArray) {
@@ -116,6 +125,7 @@ class NewPostDetailsViewModel @Inject constructor(
 data class NewPostDetailsUiState(
   // Input
   val caption: String = "",
+  val visibility: PostVisibilities = PostVisibilities.PUBLIC,
 
   // Image
   val imageURL: String? = null,
@@ -132,9 +142,7 @@ data class NewPostDetailsUiState(
   val selectedPlace: Place? = null,
 
   // States
-  val isSuccess: Boolean = false,
-  val isError: Boolean = false,
-  val isLoading: Boolean = false,
+  val loadingState: LoadingStates = LoadingStates.LOADING,
 
   // Snackbar
   val snackBarHostState: SnackbarHostState = SnackbarHostState(),

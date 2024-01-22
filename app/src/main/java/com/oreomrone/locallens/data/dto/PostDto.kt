@@ -1,5 +1,6 @@
 package com.oreomrone.locallens.data.dto
 
+import com.oreomrone.locallens.domain.PostVisibilities
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -21,8 +22,3 @@ data class PostDto(
 
 
 
-enum class PostVisibilities {
-  PUBLIC,
-  PRIVATE,
-  ME
-}
