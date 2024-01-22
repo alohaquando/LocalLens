@@ -20,5 +20,7 @@ interface PostRepository {
   suspend fun getPostsByPlaceId(placeId: String): List<PostDto>
 
   suspend fun getPostsByUserId(userId: String): List<PostDto>
+
+  suspend fun getFavsCount(postId: String): Int
 }
 

@@ -6,6 +6,7 @@ import com.oreomrone.locallens.data.utils.cleanQueryString
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Count
 import io.github.jan.supabase.storage.Storage
 import javax.inject.Inject
 
@@ -14,19 +15,23 @@ class PostRepositoryImpl @Inject constructor(
   private val storage: Storage
 ) : PostRepository {
   private val table = "posts"
+  private val postQuery = """*,
+    places(*),
+    profiles!posts_owner_fkey(*),
+    posts_favorites!posts_favorites_post_fkey(favorited_by)""".cleanQueryString()
 
   override suspend fun getAllPost(): List<PostDto> {
     return try {
       val res = postgrest.from(table).select(
         Columns.raw(
-          """*,places(*),profiles!posts_owner_fkey(*)""".cleanQueryString()
+          postQuery
         )
       ).decodeList<PostDto>()
       Log.d(
         "PostRepositoryImpl",
         "getAllPost: $res"
       )
-      res.sortedByDescending { it.timestamp}
+      res.sortedByDescending { it.timestamp }
     } catch (e: RestException) {
       Log.e(
         "PostRepositoryImpl",
@@ -56,7 +61,7 @@ class PostRepositoryImpl @Inject constructor(
     return try {
       val res = postgrest.from(table).select(
         Columns.raw(
-          """*,places(*),profiles!posts_owner_fkey(*)""".cleanQueryString()
+          postQuery
         )
       ) {
         filter {
@@ -70,7 +75,7 @@ class PostRepositoryImpl @Inject constructor(
         "PostRepositoryImpl",
         "getPostsByPlaceId: $res"
       )
-      res.sortedByDescending { it.timestamp}
+      res.sortedByDescending { it.timestamp }
     } catch (e: RestException) {
       Log.e(
         "PostRepositoryImpl",
@@ -84,7 +89,7 @@ class PostRepositoryImpl @Inject constructor(
     return try {
       val res = postgrest.from(table).select(
         Columns.raw(
-          """*,places(*),profiles!posts_owner_fkey(*)""".cleanQueryString()
+          postQuery
         )
       ) {
         filter {
@@ -98,13 +103,39 @@ class PostRepositoryImpl @Inject constructor(
         "PostRepositoryImpl",
         "getPostsByUserId: $res"
       )
-      res.sortedByDescending { it.timestamp}
+      res.sortedByDescending { it.timestamp }
     } catch (e: RestException) {
       Log.e(
         "PostRepositoryImpl",
         "getPostsByUserId: $e"
       )
       emptyList()
+    }
+  }
+
+  override suspend fun getFavsCount(postId: String): Int {
+    return try {
+      val res = postgrest.from("posts_favorites").select {
+        filter {
+          eq(
+            "post",
+            postId
+          )
+        }
+        count(Count.EXACT)
+      }.countOrNull()!!
+
+      Log.d(
+        "PostRepositoryImpl",
+        "getFavsCount: $res"
+      )
+      0
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getFavsCount: $e"
+      )
+      0
     }
   }
 }

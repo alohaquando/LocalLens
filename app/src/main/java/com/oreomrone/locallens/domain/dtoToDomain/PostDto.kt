@@ -12,7 +12,7 @@ fun PostDto.toPost(): Post {
     image = image,
     caption = caption,
     timestamp = timestamp,
-    favorites = listOf(),
+    favorites = postsFavorites.map { it.toUser() },
     user = userDto.toUser(),
   )
 }

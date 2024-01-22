@@ -3,6 +3,7 @@ package com.oreomrone.locallens.data.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+
 @Serializable
 data class PostDto(
   @SerialName("id") val id: String = "",
@@ -15,7 +16,10 @@ data class PostDto(
   @SerialName("owner") val userId: String = "",
   @SerialName("visibility") val visibility: String = PostVisibilities.PUBLIC.name,
   @SerialName("promoted_until") val promotedUntil: String = "",
-  )
+  @SerialName("posts_favorites") val postsFavorites: List<PostFavoriteDto> = emptyList(),
+)
+
+
 
 enum class PostVisibilities {
   PUBLIC,
