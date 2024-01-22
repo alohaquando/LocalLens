@@ -10,7 +10,6 @@ import kotlin.math.ceil
 
 class PlaceRepositoryImpl @Inject constructor(
   private val postgrest: Postgrest,
-  private val storage: Storage
 ) : PlaceRepository {
   private val table = "places"
 
