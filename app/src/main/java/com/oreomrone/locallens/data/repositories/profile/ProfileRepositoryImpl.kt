@@ -83,7 +83,6 @@ class ProfileRepositoryImpl @Inject constructor(
   ): Pair<Boolean, String> = withContext(Dispatchers.IO) {
     return@withContext try {
 
-
       //region Upload image to storage and get URL
       var imageBucketUrl: String? = null
 

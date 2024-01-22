@@ -7,20 +7,21 @@ interface PostRepository {
  suspend fun getAllPost(): List<PostDto>
 
   suspend fun getPost(id: String): PostDto?
-  suspend fun createPost(
-    imageFile: ByteArray? = null,
-    imageUrl: String? = null,
-    caption: String,
-    placeName: String,
-    placeAddress: String,
-    placeLatitude: Double,
-    placeLongitude: Double
-  ): Pair<Boolean, String>
 
   suspend fun getPostsByPlaceId(placeId: String): List<PostDto>
 
   suspend fun getPostsByUserId(userId: String): List<PostDto>
 
   suspend fun getFavsCount(postId: String): Int
+  suspend fun createPost(
+    imageFile: ByteArray?,
+    imageUrl: String?,
+    caption: String,
+    visibility: String,
+    placeName: String,
+    placeAddress: String,
+    placeLatitude: Double,
+    placeLongitude: Double
+  ): Pair<Boolean, String>
 }
 

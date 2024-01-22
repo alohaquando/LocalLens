@@ -1,5 +1,6 @@
 package com.oreomrone.locallens.ui.components.layouts
 
+import android.Manifest
 import android.content.res.Configuration
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -58,15 +60,20 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.oreomrone.locallens.domain.Place
 import com.oreomrone.locallens.domain.PostVisibilities
 import com.oreomrone.locallens.ui.components.BottomButtonBar
 import com.oreomrone.locallens.ui.components.ErrorAwareOutlinedTextField
 import com.oreomrone.locallens.ui.components.Image
+import com.oreomrone.locallens.ui.components.ImageSourceSelectSheet
 import com.oreomrone.locallens.ui.components.PlaceSearchSheet
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.uriToByteArray
@@ -128,27 +135,27 @@ fun PostInputLayout(
   //endregion
 
   //region Camera functions
-//  val cameraPermissionState = rememberPermissionState(
-//    Manifest.permission.CAMERA
-//  )
+  val cameraPermissionState = rememberPermissionState(
+    Manifest.permission.CAMERA
+  )
 
   val file = File(
     context.cacheDir,
     "post_image_${System.currentTimeMillis()}.png"
   )
 
-//  val uri = FileProvider.getUriForFile(
-//    context,
-//    context.packageName + ".provider",
-//    file
-//  )
+  val uri = FileProvider.getUriForFile(
+    context,
+    context.packageName + ".provider",
+    file
+  )
 
   val cameraLauncher =
     rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { _ ->
       onImageFileChange(file.readBytes())
-//      onImageChange(
-////        uri.toString()
-//      )
+      onImageChange(
+        uri.toString()
+      )
     }
 
   //region UI-related
@@ -207,6 +214,7 @@ fun PostInputLayout(
               )
               onImageFileChange(image)
             }
+            keyboardController?.hide()
             submitOnClick()
           }
         })
@@ -335,6 +343,7 @@ fun PostInputLayout(
             text = "Please make sure your caption is not empty"
           )
         },
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         isError = !captionValid,
         onValueChange = { onCaptionChange(it) },
         modifier = Modifier
@@ -353,13 +362,11 @@ fun PostInputLayout(
 
       val visibilityOptions = PostVisibilities.entries.map { it.name }
 
-      ExposedDropdownMenuBox(
-        expanded = showVisibilityMenu,
+      ExposedDropdownMenuBox(expanded = showVisibilityMenu,
         onExpandedChange = {
           showVisibilityMenu = !showVisibilityMenu
         }) {
-        OutlinedTextField(
-          readOnly = true,
+        OutlinedTextField(readOnly = true,
           value = visibility.lowercase().replaceFirstChar {
             if (it.isLowerCase()) it.titlecase(Locale.ROOT)
             else it.toString()
@@ -377,7 +384,7 @@ fun PostInputLayout(
             .fillMaxWidth(),
           supportingText = {
             when (visibility) {
-              PostVisibilities.PUBLIC.name  -> {
+              PostVisibilities.PUBLIC.name -> {
                 Text(
                   text = "Anyone can see this post"
                 )
@@ -389,34 +396,32 @@ fun PostInputLayout(
                 )
               }
 
-              PostVisibilities.ME.name      -> {
+              PostVisibilities.ME.name -> {
                 Text(
                   text = "Only you can see this post"
                 )
               }
 
-              else                          -> {
+              else -> {
                 Text(
                   text = ""
                 )
               }
             }
-          }
-        )
-        ExposedDropdownMenu(
-          expanded = showVisibilityMenu,
+          })
+        ExposedDropdownMenu(expanded = showVisibilityMenu,
           onDismissRequest = {
             showVisibilityMenu = false
           }) {
           visibilityOptions.forEach { selectionOption ->
-            DropdownMenuItem(
-              onClick = {
-                onVisibilityChange(selectionOption)
-                showVisibilityMenu = false
-              },
+            DropdownMenuItem(onClick = {
+              onVisibilityChange(selectionOption)
+              showVisibilityMenu = false
+            },
               text = {
-                Text(text = selectionOption.lowercase().replaceFirstChar { if (it.isLowerCase()) it
-                  .titlecase(Locale.ROOT) else it.toString() })
+                Text(text = selectionOption.lowercase().replaceFirstChar {
+                  if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                })
               })
           }
         }
@@ -457,21 +462,21 @@ fun PostInputLayout(
 
 
     if (showImageSourceSheet) {
-//      ImageSourceSelectSheet(onDismissRequest = { showImageSourceSheet = false },
-//        cameraOnClick = {
-//          if (cameraPermissionState.status.isGranted) {
-//            cameraLauncher.launch(uri)
-//          } else {
-//            cameraPermissionState.launchPermissionRequest()
-//          }
-//        },
-//        cameraPermissionText = when {
-//          cameraPermissionState.status.isGranted -> ""
-//          else                                   -> "Camera permission required"
-//        },
-//        galleryOnClick = {
-//          galleryLauncher.launch("image/*")
-//        })
+      ImageSourceSelectSheet(onDismissRequest = { showImageSourceSheet = false },
+        cameraOnClick = {
+          if (cameraPermissionState.status.isGranted) {
+            cameraLauncher.launch(uri)
+          } else {
+            cameraPermissionState.launchPermissionRequest()
+          }
+        },
+        cameraPermissionText = when {
+          cameraPermissionState.status.isGranted -> ""
+          else                                   -> "Camera permission required"
+        },
+        galleryOnClick = {
+          galleryLauncher.launch("image/*")
+        })
     }
 
     if (showPlaceSearchSheet) {

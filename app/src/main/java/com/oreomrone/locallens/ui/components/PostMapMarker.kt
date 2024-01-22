@@ -26,7 +26,7 @@ fun PostMapMarker(
     Icon(
       painter = painterResource(id = R.drawable.post_map_marker),
       "Post Map Marker",
-      tint = MaterialTheme.colorScheme.primary,
+      tint = MaterialTheme.colorScheme.primaryContainer,
     )
     Box(
       modifier = Modifier.padding(6.dp),
@@ -36,7 +36,7 @@ fun PostMapMarker(
         modifier = Modifier
           .size(76.dp)
           .clip(RoundedCornerShape(4.dp)),
-        background = MaterialTheme.colorScheme.background,
+        background = MaterialTheme.colorScheme.primary,
         model = imageModel,
         contentDescription = "Post Map Marker",
         clickable = true,

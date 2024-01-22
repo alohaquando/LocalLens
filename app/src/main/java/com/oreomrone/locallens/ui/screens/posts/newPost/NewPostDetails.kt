@@ -1,22 +1,28 @@
 package com.oreomrone.locallens.ui.screens.posts.newPost
 
 import android.content.res.Configuration
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.Place
+import com.oreomrone.locallens.ui.components.LoadingOverlay
+import com.oreomrone.locallens.ui.components.layouts.ErrorOverlay
 import com.oreomrone.locallens.ui.components.layouts.PostInputLayout
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 
 @Composable
 fun NewPostDetails(
   backOnClick: () -> Unit = {},
+  navigateToMe: () -> Unit = {}
 ) {
   val viewModel: NewPostDetailsViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -24,6 +30,7 @@ fun NewPostDetails(
   NewPostDetails(
     uiState = uiState,
     navigationButtonOnClick = backOnClick,
+    navigateToMe = navigateToMe,
     onCaptionChange = viewModel::onCaptionChange,
     onImageChange = viewModel::onImageChange,
     onImageRemove = viewModel::onImageRemove,
@@ -32,6 +39,7 @@ fun NewPostDetails(
     onPlaceSearchQueryChange = viewModel::onPlaceSearchQueryChange,
     placeResultOnClick = viewModel::placeResultOnClick,
     onPlaceSearchEnter = viewModel::performUpdateAutocompleteResult,
+    onVisibilityChange = viewModel::onVisibilityChange
   )
 }
 
@@ -39,6 +47,7 @@ fun NewPostDetails(
 private fun NewPostDetails(
   uiState: NewPostDetailsUiState = NewPostDetailsUiState(),
   navigationButtonOnClick: () -> Unit = {},
+  navigateToMe: () -> Unit = {},
   onCaptionChange: (String) -> Unit = {},
   onImageChange: (String) -> Unit = {},
   onImageRemove: () -> Unit = {},
@@ -47,6 +56,7 @@ private fun NewPostDetails(
   onPlaceSearchQueryChange: (String) -> Unit = {},
   placeResultOnClick: (Place) -> Unit = {},
   onPlaceSearchEnter: () -> Unit = {},
+  onVisibilityChange: (String) -> Unit = {},
 ) {
   PostInputLayout(
     title = "New post",
@@ -73,7 +83,25 @@ private fun NewPostDetails(
     placeResultOnClick = placeResultOnClick,
     selectedPlace = uiState.selectedPlace,
     onPlaceSearchEnter = onPlaceSearchEnter,
+    visibility = uiState.visibility,
+    onVisibilityChange = onVisibilityChange,
   )
+
+  AnimatedVisibility(
+    visible = (uiState.loadingState == LoadingStates.LOADING),
+    enter = fadeIn(),
+    exit = fadeOut()
+  ) {
+    LoadingOverlay()
+  }
+
+  if (uiState.loadingState == LoadingStates.ERROR) {
+    ErrorOverlay(backOnClick = navigationButtonOnClick)
+  }
+
+  if (uiState.loadingState == LoadingStates.SUCCESS) {
+    navigateToMe()
+  }
 }
 
 @Preview(

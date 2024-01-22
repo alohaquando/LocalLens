@@ -61,14 +61,17 @@ fun AppNavHost(
     startDestination = startDestination,
     modifier = modifier
   ) {
-     fun destinationPersonDetailsOrMe(id: String) : String {
-       Log.d("AppNavHost", "destinationPersonDetailsOrMe: id = ${id} || sessionId = ${sessionId}")
-       return if (id == sessionId) {
-         navController.popBackStack()
-         AppNavDests.Me.name
-       } else {
-         AppNavDests.DetailsPerson.name + "/${id}"
-       }
+    fun destinationPersonDetailsOrMe(id: String): String {
+      Log.d(
+        "AppNavHost",
+        "destinationPersonDetailsOrMe: id = ${id} || sessionId = ${sessionId}"
+      )
+      return if (id == sessionId) {
+        navController.popBackStack()
+        AppNavDests.Me.name
+      } else {
+        AppNavDests.DetailsPerson.name + "/${id}"
+      }
     }
 
     //region Account Settings
@@ -240,8 +243,10 @@ fun AppNavHost(
       popExitTransition = popExitVerticalTransition
     ) {
       CompleteAccountProfile(navigateToMe = {
-        navController.popBackStack()
-        navController.navigate(AppNavDests.Me.name) })
+        navController.navigate(AppNavDests.Me.name) {
+          popUpTo(AppNavDests.Me.name) {}
+        }
+      })
     }
     //endregion
 
@@ -430,7 +435,12 @@ fun AppNavHost(
       popEnterTransition = popEnterVerticalTransition,
       popExitTransition = popExitVerticalTransition
     ) {
-      NewPostDetails(backOnClick = { navController.popBackStack() })
+      NewPostDetails(backOnClick = { navController.popBackStack() },
+        navigateToMe = {
+          navController.navigate(AppNavDests.Me.name) {
+            popUpTo(AppNavDests.Me.name) {}
+          }
+        })
     }
     composable(
       AppNavDests.EditPostDetails.name + "/{id}",

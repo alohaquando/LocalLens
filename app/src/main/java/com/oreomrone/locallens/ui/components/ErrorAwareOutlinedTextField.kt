@@ -28,7 +28,8 @@ fun ErrorAwareOutlinedTextField(
   isError: Boolean = false,
   maxLines: Int = 1,
   visualTransformation: VisualTransformation = VisualTransformation.None,
-  keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+  keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+
 ) {
   var initialFocus by remember {
     mutableStateOf(false)
@@ -60,7 +61,8 @@ fun ErrorAwareOutlinedTextField(
     placeholder = { placeholder?.invoke() },
     visualTransformation = visualTransformation,
     maxLines = maxLines,
-    keyboardOptions = keyboardOptions
+    keyboardOptions = keyboardOptions,
+
   )
 }
 
