@@ -27,7 +27,7 @@ import com.oreomrone.locallens.ui.navigation.AppNavHost
 import com.oreomrone.locallens.ui.navigation.BottomMainNavVisibleDestinations
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.StartDestinationViewModel
-import com.oreomrone.locallens.ui.utils.TestViewModel
+import com.oreomrone.locallens.ui.tests.TestViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.handleDeeplinks

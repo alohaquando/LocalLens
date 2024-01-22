@@ -175,7 +175,11 @@ fun PostsMapLayout(
                 },
               )
             }
-
+            Spacer(
+              modifier = Modifier.height(
+                56.dp
+              )
+            )
             Spacer(modifier = Modifier.height(it.calculateBottomPadding()))
           }
         }
@@ -291,6 +295,7 @@ fun PostsMapLayout(
                 deleteOnClick(clickedPost!!.id)
               }
             })
+
           Spacer(
             modifier = Modifier.height(
               WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()

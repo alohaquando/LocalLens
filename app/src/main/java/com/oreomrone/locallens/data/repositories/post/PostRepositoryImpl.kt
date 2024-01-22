@@ -2,6 +2,7 @@ package com.oreomrone.locallens.data.repositories.post
 
 import android.util.Log
 import com.oreomrone.locallens.data.dto.PostDto
+import com.oreomrone.locallens.data.utils.cleanQueryString
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -12,40 +13,20 @@ class PostRepositoryImpl @Inject constructor(
   private val postgrest: Postgrest,
   private val storage: Storage
 ) : PostRepository {
-  private val table = "post"
+  private val table = "posts"
 
   override suspend fun getAllPost(): List<PostDto> {
     return try {
       val res = postgrest.from(table).select(
         Columns.raw(
-          """
-    id,
-    caption,
-    timestamp,
-    image,
-    visibility,
-    promoted_until,
-    place(
-      id,
-      name,
-      address,
-      latitude,
-      longitude
-    ),
-    owner (
-      id,
-      username,
-      full_name,
-      avatar_url
-    )
-""".trimIndent()
+          """*,places(*),profiles!posts_owner_fkey(*)""".cleanQueryString()
         )
-      )
+      ).decodeList<PostDto>()
       Log.d(
         "PostRepositoryImpl",
         "getAllPost: $res"
       )
-      emptyList()
+      res
     } catch (e: RestException) {
       Log.e(
         "PostRepositoryImpl",

@@ -5,14 +5,14 @@ import com.oreomrone.locallens.domain.Place
 import com.oreomrone.locallens.domain.Post
 import com.oreomrone.locallens.domain.User
 
-fun PostDto.toPost(place: Place, user: User): Post {
+fun PostDto.toPost(): Post {
   return Post(
     id = id,
-    place = place,
+    place = placeDto.toPlace(),
     image = image,
     caption = caption,
     timestamp = timestamp,
     favorites = listOf(),
-    user = user,
+    user = userDto.toUser(),
   )
 }

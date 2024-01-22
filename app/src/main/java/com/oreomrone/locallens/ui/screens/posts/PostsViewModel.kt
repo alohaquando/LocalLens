@@ -3,11 +3,14 @@ package com.oreomrone.locallens.ui.screens.posts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.Post
+import com.oreomrone.locallens.domain.dtoToDomain.toPost
 import com.oreomrone.locallens.ui.utils.PostClusterItem
 import com.oreomrone.locallens.ui.utils.SampleData.samplePost
 import com.oreomrone.locallens.ui.utils.SampleData.samplePost1
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,8 +18,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class PostsViewModel @Inject constructor(
-
+  private val postRepository: PostRepository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(PostsUiState())
   val uiState: StateFlow<PostsUiState> = _uiState.asStateFlow()
@@ -27,10 +31,7 @@ class PostsViewModel @Inject constructor(
 
   private fun getPosts() {
     viewModelScope.launch {
-      val posts = listOf(
-        samplePost,
-        samplePost1
-      ) // TODO: Get new post
+      val posts = postRepository.getAllPost().map { it.toPost() }
       val postsClusterItems = posts.map {
         PostClusterItem(
           itemPosition = LatLng(

@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
+import com.oreomrone.locallens.ui.utils.JsonTimestampToDateTime
 import com.oreomrone.locallens.ui.utils.conditional
 
 @Composable
@@ -272,7 +273,7 @@ fun Post(
           verticalAlignment = Alignment.CenterVertically
         ) {
           Text(
-            text = date,
+            text = JsonTimestampToDateTime(date),
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
           )
         }
@@ -389,11 +390,12 @@ private fun PostPreview() {
     Post(
       place = "Post Office Square Park, Memorial Monument",
       address = "130 Congress St, Boston, MA 02110, United States",
-      caption = "Captured one of my favorite places on a beautiful Sunday morning. Nothing better than this. I love being here so much, as it is so peaceful and beautiful. I love the architecture of the buildings. Honestly, I think this is one of the best places in Boston. There's so much to do here, and it's so interesting.",
+      caption = "Captured one of my favorite places on a beautiful Sunday morning. Nothing better" +
+              " than this. I love being here so much, as it is so peaceful and beautiful. I love the architecture of the buildings. Honestly, I think this is one of the best places in Boston. There's so much to do here, and it's so interesting.",
       isFavorite = true,
       favorites = 59659,
       username = "oreomrone_the_explorer",
-      date = "26 Sep 2021 10:00 AM",
+      date = "2024-01-22T10:26:45.49646+00:00",
       postImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
       userImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
 
@@ -413,7 +415,7 @@ fun PostPreviewShort() {
       showMenuButton = true,
       favorites = 59659,
       username = "oreomrone_the_explorer",
-      date = "26 Sep 2021 10:00 AM",
+      date = "2024-01-22T10:26:45.49646+00:00",
       postImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
       userImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
 
