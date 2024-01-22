@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +41,8 @@ fun DetailsPerson(
   followingOnClick: (String) -> Unit = {},
   placeOnClick: (String) -> Unit = {},
   userOnClick: (String) -> Unit = {},
-  editOnClick: (String) -> Unit = {}
+  editOnClick: (String) -> Unit = {},
+  messageOnClick: () -> Unit = {},
 ) {
   val viewModel: DetailsPersonViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -71,6 +73,7 @@ fun DetailsPerson(
     },
     favoriteOnClick = postViewModel::performFavoritePost,
     deleteOnClick = postViewModel::performDeletePost,
+    messageOnClick = messageOnClick,
   )
 }
 
@@ -88,6 +91,7 @@ private fun DetailsPerson(
   placeOnClick: (String) -> Unit = {},
   userOnClick: (String) -> Unit = {},
   editOnClick: (String) -> Unit = {},
+  messageOnClick: () -> Unit = {},
   navigateOnClick: (Double, Double, String) -> Unit = { _, _, _ -> },
   favoriteOnClick: suspend (String) -> Unit = {},
   deleteOnClick: suspend (String) -> Unit = {},
@@ -132,6 +136,9 @@ private fun DetailsPerson(
               ) {
                 // TODO: Dynamic this
                 Text(text = "Follow")
+              }
+              OutlinedButton(onClick = { messageOnClick() }) {
+                Text(text = "Message")
               }
             }
           },

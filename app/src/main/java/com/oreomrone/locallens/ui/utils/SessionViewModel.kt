@@ -16,20 +16,19 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class StartDestinationViewModel @Inject constructor(
+class SessionViewModel @Inject constructor(
   private val auth: Auth,
   private val profileRepository: ProfileRepository
 ) : ViewModel() {
-  private val _uiState = MutableStateFlow(AuthUiState())
-  val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+  private val _uiState = MutableStateFlow(SessionUiState())
+  val uiState: StateFlow<SessionUiState> = _uiState.asStateFlow()
 
   init {
     viewModelScope.launch {
       auth.sessionStatus.collect {
         when (it) {
           // when user is authenticated
-          is SessionStatus.Authenticated
-          -> {
+          is SessionStatus.Authenticated                                                               -> {
             // Get their profile
             val sessionProfile = it.session.user?.let { sessionUser ->
               profileRepository.getProfileById(sessionUser.id)
@@ -43,6 +42,7 @@ class StartDestinationViewModel @Inject constructor(
                   _uiState.update { currentState ->
                     currentState.copy(
                       startingDestination = AppNavDests.CompleteAccountProfile.name,
+                      sessionId = it.session.user?.id,
                       loadingStates = LoadingStates.SUCCESS
                     )
                   }
@@ -53,12 +53,13 @@ class StartDestinationViewModel @Inject constructor(
                   _uiState.update { currentState ->
                     currentState.copy(
                       startingDestination = AppNavDests.Posts.name,
+                      sessionId = it.session.user?.id,
                       loadingStates = LoadingStates.SUCCESS
                     )
                   }
                 }
               }
-            } else{
+            } else {
               _uiState.update { currentState ->
                 currentState.copy(
                   startingDestination = AppNavDests.AuthSignIn.name,
@@ -84,7 +85,8 @@ class StartDestinationViewModel @Inject constructor(
   }
 }
 
-data class AuthUiState(
+data class SessionUiState(
   val startingDestination: String? = null,
+  val sessionId: String? = null,
   val loadingStates: LoadingStates = LoadingStates.LOADING
 )

@@ -26,7 +26,7 @@ import com.oreomrone.locallens.ui.components.LoadingOverlay
 import com.oreomrone.locallens.ui.navigation.AppNavHost
 import com.oreomrone.locallens.ui.navigation.BottomMainNavVisibleDestinations
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
-import com.oreomrone.locallens.ui.utils.StartDestinationViewModel
+import com.oreomrone.locallens.ui.utils.SessionViewModel
 import com.oreomrone.locallens.ui.tests.TestViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
@@ -51,8 +51,8 @@ class MainActivity : ComponentActivity() {
         appNavController.currentBackStackEntryAsState().value?.destination?.route
       val showBottomMainNavBar = currentDestination in BottomMainNavVisibleDestinations
 
-      val startDestinationViewModel: StartDestinationViewModel = hiltViewModel()
-      val authUiState by startDestinationViewModel.uiState.collectAsStateWithLifecycle()
+      val sessionViewModel: SessionViewModel = hiltViewModel()
+      val authUiState by sessionViewModel.uiState.collectAsStateWithLifecycle()
 
       val testViewModel: TestViewModel = hiltViewModel()
       val testUiState by testViewModel.uiState.collectAsStateWithLifecycle()
@@ -91,7 +91,8 @@ class MainActivity : ComponentActivity() {
                 LoadingStates.SUCCESS -> {
                   AppNavHost(
                     navController = appNavController,
-                    startDestination = authUiState.startingDestination!!
+                    startDestination = authUiState.startingDestination!!,
+                    sessionId = authUiState.sessionId,
                   )
                 }
                 else                  -> {

@@ -1,5 +1,6 @@
 package com.oreomrone.locallens.ui.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -53,12 +54,23 @@ fun AppNavHost(
   modifier: Modifier = Modifier,
   navController: NavHostController = rememberNavController(),
   startDestination: String = AppNavDests.AuthSignIn.name,
+  sessionId: String? = null,
 ) {
   NavHost(
     navController = navController,
     startDestination = startDestination,
     modifier = modifier
   ) {
+     fun destinationPersonDetailsOrMe(id: String) : String {
+       Log.d("AppNavHost", "destinationPersonDetailsOrMe: id = ${id} || sessionId = ${sessionId}")
+       return if (id == sessionId) {
+         navController.popBackStack()
+         AppNavDests.Me.name
+       } else {
+         AppNavDests.DetailsPerson.name + "/${id}"
+       }
+    }
+
     //region Account Settings
     composable(
       AppNavDests.AccountSettings.name,
@@ -243,8 +255,8 @@ fun AppNavHost(
     ) {
       DetailsPlace(
         backOnClick = { navController.popBackStack() },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
-        editOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
+        editOnClick = { navController.navigate(AppNavDests.EditPostDetails.name + "/${it}") },
       )
     }
     composable(
@@ -260,7 +272,7 @@ fun AppNavHost(
         followersOnClick = { navController.navigate(AppNavDests.DetailsFollowers.name + "/${it}") },
         followingOnClick = { navController.navigate(AppNavDests.DetailsFollowing.name + "/${it}") },
         placeOnClick = { navController.navigate(AppNavDests.DetailsPlace.name + "/${it}") },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
         editOnClick = { navController.navigate(AppNavDests.EditPostDetails.name + "/${it}") },
       )
     }
@@ -273,7 +285,7 @@ fun AppNavHost(
     ) {
       DetailsFollowers(
         backOnClick = { navController.popBackStack() },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
       )
     }
     composable(
@@ -285,7 +297,7 @@ fun AppNavHost(
     ) {
       DetailsFollowing(
         backOnClick = { navController.popBackStack() },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
       )
     }
     composable(
@@ -298,7 +310,7 @@ fun AppNavHost(
       DetailsPostsMap(
         backOnClick = { navController.popBackStack() },
         placeOnClick = { navController.navigate(AppNavDests.DetailsPlace.name + "/${it}") },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
         editOnClick = { navController.navigate(AppNavDests.EditPostDetails.name + "/${it}") },
       )
     }
@@ -315,7 +327,7 @@ fun AppNavHost(
       Discover(
         searchBarOnClick = { navController.navigate(AppNavDests.DiscoverSearch.name) },
         placeOnClick = { navController.navigate(AppNavDests.DetailsPlace.name + "/${it}") },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
         editOnClick = { navController.navigate(AppNavDests.EditPostDetails.name + "/${it}") },
       )
     }
@@ -329,7 +341,7 @@ fun AppNavHost(
       DiscoverSearch(
         backOnClick = { navController.popBackStack() },
         placeResultOnClick = { navController.navigate(AppNavDests.DetailsPlace.name + "/${it}") },
-        userResultOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userResultOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
       )
     }
     //endregion
@@ -346,7 +358,7 @@ fun AppNavHost(
         editProfileOnClick = { navController.navigate(AppNavDests.AccountSettingsChangeProfile.name) },
         accountSettingsOnClick = { navController.navigate(AppNavDests.AccountSettings.name) },
         placeOnClick = { navController.navigate(AppNavDests.DetailsPlace.name + "/${it}") },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
         editOnClick = { navController.navigate(AppNavDests.EditPostDetails.name + "/${it}") },
         placesOnClick = { navController.navigate(AppNavDests.DetailsPostsMap.name + "/${it}") },
         followersOnClick = { navController.navigate(AppNavDests.DetailsFollowers.name + "/${it}") },
@@ -390,7 +402,7 @@ fun AppNavHost(
     ) {
       Notifications(
         backOnClick = { navController.popBackStack() },
-        notificationOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        notificationOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
       )
     }
     //endregion
@@ -406,7 +418,7 @@ fun AppNavHost(
       Posts(
         notificationsOnClick = { navController.navigate(AppNavDests.Notifications.name) },
         placeOnClick = { navController.navigate(AppNavDests.DetailsPlace.name + "/${it}") },
-        userOnClick = { navController.navigate(AppNavDests.DetailsPerson.name + "/${it}") },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
         editOnClick = { navController.navigate(AppNavDests.EditPostDetails.name + "/${it}") },
       )
     }
