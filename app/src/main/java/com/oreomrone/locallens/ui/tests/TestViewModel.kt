@@ -15,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class TestViewModel @Inject constructor(
-  private val testRepository: TestRepository
+  private val testRepository: TestRepository,
+  private val profileRepository: ProfileRepository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(TestUiState())
   val uiState: StateFlow<TestUiState> = _uiState.asStateFlow()
@@ -23,6 +24,7 @@ class TestViewModel @Inject constructor(
   init {
     viewModelScope.launch {
       testRepository.test()
+
     }
   }
 }

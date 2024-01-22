@@ -5,10 +5,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
+import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.Post
+import com.oreomrone.locallens.domain.dtoToDomain.toPost
 import com.oreomrone.locallens.ui.utils.PostClusterItem
 import com.oreomrone.locallens.ui.utils.SampleData
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,8 +19,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class DetailsPostsMapViewModel @Inject constructor(
-  savedStateHandle: SavedStateHandle
+  savedStateHandle: SavedStateHandle,
+  private val postRepository: PostRepository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(DetailsPostsMapUiState())
   val uiState: StateFlow<DetailsPostsMapUiState> = _uiState.asStateFlow()
@@ -43,7 +48,7 @@ class DetailsPostsMapViewModel @Inject constructor(
 
   private fun getPosts(userId: String) {
     viewModelScope.launch {
-      val posts = _uiState.value.posts // TODO: Get user's post
+      val posts = postRepository.getPostsByUserId(userId).map { it.toPost() }
       val postsClusterItems = posts.map {
         PostClusterItem(
           itemPosition = LatLng(

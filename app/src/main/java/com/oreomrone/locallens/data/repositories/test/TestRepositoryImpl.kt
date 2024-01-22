@@ -2,6 +2,7 @@ package com.oreomrone.locallens.data.repositories.test
 
 import android.util.Log
 import com.oreomrone.locallens.data.dto.ProfileDto
+import com.oreomrone.locallens.data.dto.ProfilesWrapperDto
 import com.oreomrone.locallens.data.utils.cleanQueryString
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.Auth
@@ -23,26 +24,29 @@ class TestRepositoryImpl @Inject constructor(
             *,
             followers: follows!follows_followed_fkey(follower),
             followings: follows!follows_follower_fkey(followed),
-            places: posts!posts_owner_fkey(place)
+            places: posts!posts_owner_fkey(place(id))
           """.cleanQueryString()
         )
-      ){
-        filter{
+      ) {
+        filter {
           eq(
             "id",
             "8b0c4a1d-3633-4f3b-a336-dc4bf69f88f9"
           )
         }
-        single()
       }
       Log.d(
-        "TestRepository",
-        "Test: ${res.data}"
+        "TestImpl",
+        "getProfileById: ${res.data}"
+      )
+      Log.d(
+        "TestImpl",
+        "getProfileById: ${res.decodeSingle<ProfileDto>()}"
       )
     } catch (e: RestException) {
       Log.e(
-        "TestRepository",
-        "Test: $e"
+        "TestImpl",
+        "getProfileById: $e"
       )
     }
   }

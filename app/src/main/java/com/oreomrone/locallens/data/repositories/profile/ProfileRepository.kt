@@ -16,5 +16,9 @@ interface ProfileRepository {
   ): Pair<Boolean, String>
 
   suspend fun validateUsernameUnique(username: String): Boolean
+
+  suspend fun getFollowersById(id: String): List<ProfileDto>
+
+  suspend fun getFollowingsById(id: String): List<ProfileDto>
 }
 

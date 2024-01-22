@@ -15,5 +15,10 @@ data class ProfileDto(
   @SerialName("is_private") val isPrivate: Boolean = false,
   @SerialName("followers") val followersDtos: List<FollowerDto> = emptyList(),
   @SerialName("followings") val followingsDtos: List<FollowingsDto> = emptyList(),
-  @SerialName("places") val placesDtos: List<PlaceDto> = emptyList(),
+  @SerialName("places") val placesWrapperDtos: List<PlacesWrapperDto> = emptyList(),
+)
+
+@Serializable
+data class ProfilesWrapperDto(
+  @SerialName("profiles") val profiles: ProfileDto = ProfileDto(),
 )

@@ -5,10 +5,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class FollowerDto (
-  @SerialName("follower") val follower: String
+  @SerialName("follower") val follower: String = ""
 )
 
 @Serializable
 data class FollowingsDto (
-  @SerialName("followed") val followed: String
+  @SerialName("followed") val followed: String = ""
 )

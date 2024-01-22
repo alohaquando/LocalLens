@@ -12,3 +12,8 @@ data class PlaceDto (
   @SerialName("latitude") val latitude: Double = 0.0,
   @SerialName("longitude") val longitude: Double = 0.0
 )
+
+@Serializable
+data class PlacesWrapperDto (
+  @SerialName("place") val place: PlaceDto = PlaceDto()
+)

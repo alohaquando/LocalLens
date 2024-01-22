@@ -2,6 +2,7 @@ package com.oreomrone.locallens.data.repositories.profile
 
 import android.util.Log
 import com.oreomrone.locallens.data.dto.ProfileDto
+import com.oreomrone.locallens.data.dto.ProfilesWrapperDto
 import com.oreomrone.locallens.data.utils.BuildProfileImageUrl
 import com.oreomrone.locallens.data.utils.cleanQueryString
 import io.github.jan.supabase.exceptions.RestException
@@ -42,13 +43,14 @@ class ProfileRepositoryImpl @Inject constructor(
     return try {
       val res = postgrest.from(table).select(
         Columns.raw(
-        """
+          """
             *,
             followers: follows!follows_followed_fkey(follower),
             followings: follows!follows_follower_fkey(followed),
-            places: posts!posts_owner_fkey(place)
+            places: posts!posts_owner_fkey(place(id))
           """.cleanQueryString()
-      )) {
+        )
+      ) {
         filter {
           eq(
             "id",
@@ -161,7 +163,8 @@ class ProfileRepositoryImpl @Inject constructor(
       if (res !== null) {
         Log.e(
           "ProfileRepositoryImpl",
-          "validateUsernameUnique:${res.id == auth.currentSessionOrNull()?.user?.id}")
+          "validateUsernameUnique:${res.id == auth.currentSessionOrNull()?.user?.id}"
+        )
         auth.currentSessionOrNull()?.user?.id == res.id
       } else {
         true
@@ -176,4 +179,69 @@ class ProfileRepositoryImpl @Inject constructor(
   }
 
 
+  override suspend fun getFollowersById(id: String): List<ProfileDto> {
+    return try {
+      val res = postgrest.from("follows").select(
+        Columns.raw(
+          """
+            profiles!follows_follower_fkey(*)
+          """.cleanQueryString()
+        )
+      ) {
+        filter {
+          eq(
+            "followed",
+            id
+          )
+        }
+      }
+      var followers = listOf<ProfileDto>()
+      res.decodeList<ProfilesWrapperDto>().map { followers = followers.plus(it.profiles) }
+
+      Log.d(
+        "ProfileRepositoryImpl",
+        "getFollowersById: $followers"
+      )
+      followers
+    } catch (e: RestException) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        id
+      )
+      emptyList()
+    }
+  }
+
+  override suspend fun getFollowingsById(id: String): List<ProfileDto> {
+    return try {
+      val res = postgrest.from("follows").select(
+        Columns.raw(
+          """
+            profiles!follows_followed_fkey(*)
+          """.cleanQueryString()
+        )
+      ) {
+        filter {
+          eq(
+            "follower",
+            id
+          )
+        }
+      }
+      var followings = listOf<ProfileDto>()
+      res.decodeList<ProfilesWrapperDto>().map { followings = followings.plus(it.profiles) }
+
+      Log.d(
+        "ProfileRepositoryImpl",
+        "getFollowingsById: $followings"
+      )
+      followings
+    } catch (e: RestException) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "getFollowingsById: $e"
+      )
+      emptyList()
+    }
+  }
 }

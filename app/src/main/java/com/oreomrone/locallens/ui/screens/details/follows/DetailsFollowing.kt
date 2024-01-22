@@ -86,7 +86,7 @@ private fun DetailsFollowing(
             .imePadding(),
           topBar = {
             CenterAlignedTopAppBar(title = {
-              Text(text = "Followers")
+              Text(text = "Following")
             },
               scrollBehavior = scrollBehavior,
               navigationIcon = {
