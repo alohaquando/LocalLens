@@ -23,5 +23,8 @@ interface PostRepository {
     placeLatitude: Double,
     placeLongitude: Double
   ): Pair<Boolean, String>
+
+  suspend fun favoritePost(id: String): Pair<Boolean, String>
+  suspend fun unfavoritePost(id: String): Pair<Boolean, String>
 }
 

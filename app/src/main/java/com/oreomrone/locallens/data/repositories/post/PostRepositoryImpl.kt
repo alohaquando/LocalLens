@@ -1,11 +1,14 @@
 package com.oreomrone.locallens.data.repositories.post
 
+import android.text.TextUtils.substring
 import android.util.Log
 import com.oreomrone.locallens.data.dto.PostDto
+import com.oreomrone.locallens.data.dto.PostFavoriteDto
 import com.oreomrone.locallens.data.repositories.place.PlaceRepository
 import com.oreomrone.locallens.data.utils.BuildProfileImageUrl
 import com.oreomrone.locallens.data.utils.cleanQueryString
 import io.github.jan.supabase.exceptions.RestException
+import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Count
@@ -19,7 +22,8 @@ import javax.inject.Inject
 class PostRepositoryImpl @Inject constructor(
   private val postgrest: Postgrest,
   private val storage: Storage,
-  private val placeRepository: PlaceRepository
+  private val placeRepository: PlaceRepository,
+  private val auth: Auth
 ) : PostRepository {
   private val table = "posts"
   private val postQuery = """*,
@@ -49,7 +53,95 @@ class PostRepositoryImpl @Inject constructor(
   }
 
   override suspend fun getPost(id: String): PostDto? {
-    TODO("Not yet implemented")
+    return try {
+      val res = postgrest.from(table).select(
+        Columns.raw(
+          postQuery
+        )
+      ) {
+        filter {
+          eq(
+            "id",
+            id
+          )
+        }
+      }.decodeSingleOrNull<PostDto>()
+      Log.d(
+        "PostRepositoryImpl",
+        "getPost: $res"
+      )
+      res
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPost: $e"
+      )
+      null
+    }
+  }
+
+  override suspend fun favoritePost(id: String) : Pair<Boolean,String> {
+    return try {
+      val res = postgrest.from("posts_favorites").insert(
+        PostFavoriteDto(
+          postId = id,
+        )
+      ) {
+        select()
+      }.decodeSingleOrNull<PostFavoriteDto>()
+
+      if (res != null ) {
+        Log.d(
+          "PostRepositoryImpl",
+          "favoritePost: $res"
+        )
+        Pair(true, "Post favorited successfully.")
+      } else {
+        Log.e(
+          "PostRepositoryImpl",
+          "favoritePost: returned null $res"
+        )
+        Pair(false, "Failed to favorite post.")
+      }
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "favoritePost: $e"
+      )
+      Pair(false, "Failed to favorite post. ${e.message?.take(50)}...")
+    }
+  }
+
+  override suspend fun unfavoritePost(id: String) : Pair<Boolean,String> {
+    return try {
+      val res =postgrest.from("posts_favorites").delete {
+        select()
+        filter {
+          eq("post", id)
+          eq("favorited_by", auth.currentUserOrNull()?.id ?: "")
+        }
+      }.decodeSingleOrNull<PostFavoriteDto>()
+
+      if (res != null ) {
+        Log.d(
+          "PostRepositoryImpl",
+          "unfavoritePost: $res"
+        )
+        Pair(true, "Post unfavorited successfully.")
+      } else {
+        Log.e(
+          "PostRepositoryImpl",
+          "unfavoritePost: returned null $res"
+        )
+        Pair(false, "Failed to unfavorite post.")
+      }
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "unfavoritePost: $e"
+      )
+      Pair(false, "Failed to unfavorite post. ${e.message?.take(50)}...")
+    }
   }
 
   override suspend fun createPost(
