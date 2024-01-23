@@ -6,6 +6,7 @@ data class Post(
   val caption: String,
   val timestamp: String,
   val favorites: List<User> = listOf(),
+  val visibility: String = PostVisibilities.PUBLIC.name,
   val image: Any,
   var user: User? = null,
   var favoritedByCurrentUser: Boolean = false,

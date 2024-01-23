@@ -6,10 +6,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oreomrone.locallens.data.repositories.placesAutocomplete.PlacesAutocompleteRepository
+import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.Place
 import com.oreomrone.locallens.domain.Post
+import com.oreomrone.locallens.domain.PostVisibilities
 import com.oreomrone.locallens.domain.dtoToDomain.asDomainModel
+import com.oreomrone.locallens.domain.dtoToDomain.toPost
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class EditPostDetailsViewModel @Inject constructor(
   private val placesAutocompleteRepository: PlacesAutocompleteRepository,
-  savedStateHandle: SavedStateHandle
+  savedStateHandle: SavedStateHandle,
+  private val postRepository: PostRepository
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(EditPostDetailsUiState())
   val uiState: StateFlow<EditPostDetailsUiState> = _uiState.asStateFlow()
@@ -52,18 +56,19 @@ class EditPostDetailsViewModel @Inject constructor(
         currentState.copy(
           caption = post.caption,
           imageURL = post.image.toString(),
+          visibility = post.visibility,
           captionValid = true,
           inputValid = true,
           selectedPlace = post.place,
           placeSearchQuery = post.place.name,
-          loadingState = LoadingStates.SUCCESS
+          loadingState = LoadingStates.IDLE
         )
       }
     }
   }
 
   private suspend fun getPost(id: String): Post? {
-    return null// TODO
+    return postRepository.getPost(id)?.toPost()
   }
 
   private fun logAndSetError(message: String) {
@@ -79,7 +84,39 @@ class EditPostDetailsViewModel @Inject constructor(
   }
 
   suspend fun performSave() {
-    // TODO
+    viewModelScope.launch {
+      _uiState.update { currentState ->
+        currentState.copy(
+          loadingState = LoadingStates.LOADING
+        )
+      }
+
+      val res = postRepository.updatePost(
+        id = id!!,
+        caption = _uiState.value.caption,
+        visibility = _uiState.value.visibility,
+        placeName = _uiState.value.selectedPlace!!.name,
+        placeAddress = _uiState.value.selectedPlace!!.address,
+        placeLatitude = _uiState.value.selectedPlace!!.latitude,
+        placeLongitude = _uiState.value.selectedPlace!!.longitude,
+      )
+
+      if (res.first) {
+        _uiState.update { currentState ->
+          currentState.copy(
+            loadingState = LoadingStates.SUCCESS
+          )
+        }
+        _uiState.value.snackBarHostState.showSnackbar(res.second)
+      } else {
+        _uiState.update { currentState ->
+          currentState.copy(
+            loadingState = LoadingStates.ERROR
+          )
+        }
+        _uiState.value.snackBarHostState.showSnackbar(res.second)
+      }
+    }
   }
 
   fun onCaptionChange(caption: String) {
@@ -92,10 +129,18 @@ class EditPostDetailsViewModel @Inject constructor(
     validateInput()
   }
 
+  fun onVisibilityChange(visibility: String) {
+    _uiState.update { currentState ->
+      currentState.copy(
+        visibility = visibility
+      )
+    }
+  }
+
   private fun validateInput() {
     _uiState.update { currentState ->
       currentState.copy(
-        inputValid = currentState.captionValid && currentState.selectedPlace != null
+        inputValid = currentState.captionValid && currentState.selectedPlace != null && currentState.visibility.isNotBlank()
       )
     }
   }
@@ -151,6 +196,7 @@ class EditPostDetailsViewModel @Inject constructor(
 data class EditPostDetailsUiState(
   // Input
   val caption: String = "",
+  val visibility: String = PostVisibilities.PUBLIC.name,
 
   // Image
   val imageURL: String? = null,

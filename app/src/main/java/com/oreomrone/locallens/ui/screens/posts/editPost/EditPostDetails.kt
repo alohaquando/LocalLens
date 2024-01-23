@@ -1,8 +1,11 @@
 package com.oreomrone.locallens.ui.screens.posts.editPost
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -33,6 +36,7 @@ fun EditPostDetails(
     onPlaceSearchQueryChange = viewModel::onPlaceSearchQueryChange,
     placeResultOnClick = viewModel::placeResultOnClick,
     onPlaceSearchEnter = viewModel::performUpdateAutocompleteResult,
+    onVisibilityChange = viewModel::onVisibilityChange
   )
 }
 
@@ -45,51 +49,49 @@ private fun EditPostDetails(
   onPlaceSearchQueryChange: (String) -> Unit = {},
   placeResultOnClick: (Place) -> Unit = {},
   onPlaceSearchEnter: () -> Unit = {},
-) {
-  Crossfade(targetState =uiState.loadingState,
-    label = "EditPostDetails loadingState crossfade"
+  onVisibilityChange: (String) -> Unit = {},
   ) {
-    when (it) {
-      LoadingStates.LOADING -> {
-        LoadingOverlay()
-      }
+  PostInputLayout(
+    title = "Edit post",
+    navigationIcon = Icons.Default.ArrowBack,
+    submitButtonText = "Post",
+    caption = uiState.caption,
+    imageURL = uiState.imageURL,
+    inputValid = uiState.inputValid,
+    captionValid = uiState.captionValid,
+    imageChangeEnabled = false,
+    alertDialogTitle = "Cancel editing post?",
+    alertDialogText = "If you cancel now, your edits will be lost.",
+    alertDialogConfirmText = "Cancel edits",
+    snackbarHostState = uiState.snackBarHostState,
+    navigationButtonOnClick = navigationButtonOnClick,
+    onCaptionChange = onCaptionChange,
+    submitOnClick = submitOnClick,
+    showPlaceError = uiState.showPlaceError,
+    placeSearchQuery = uiState.placeSearchQuery,
+    onPlaceSearchQueryChange = onPlaceSearchQueryChange,
+    placeSearchResult = uiState.placeSearchResult,
+    placeResultOnClick = placeResultOnClick,
+    selectedPlace = uiState.selectedPlace,
+    onPlaceSearchEnter = onPlaceSearchEnter,
+    visibility = uiState.visibility,
+    onVisibilityChange = onVisibilityChange,
+  )
 
-      LoadingStates.ERROR -> {
-        ErrorOverlay(
-          backOnClick = navigationButtonOnClick,
-        )
-      }
+  AnimatedVisibility(
+    visible = (uiState.loadingState == LoadingStates.LOADING),
+    enter = fadeIn(),
+    exit = fadeOut()
+  ) {
+    LoadingOverlay()
+  }
 
-      else -> {
-        PostInputLayout(
-          title = "Edit post",
-          navigationIcon = Icons.Default.ArrowBack,
-          submitButtonText = "Post",
-          caption = uiState.caption,
-          imageURL = uiState.imageURL,
-          inputValid = uiState.inputValid,
-          captionValid = uiState.captionValid,
-          alertDialogTitle = "Cancel edit post?",
-          alertDialogText = "If you cancel now, your edits won't be saved.",
-          alertDialogConfirmText = "Cancel edit",
-          snackbarHostState = uiState.snackBarHostState,
-          navigationButtonOnClick = navigationButtonOnClick,
-          onCaptionChange = onCaptionChange,
-          onImageChange = {},
-          onImageRemove = {},
-          onImageFileChange = {},
-          imageChangeEnabled = false,
-          submitOnClick = submitOnClick,
-          showPlaceError = uiState.showPlaceError,
-          placeSearchQuery = uiState.placeSearchQuery,
-          onPlaceSearchQueryChange = onPlaceSearchQueryChange,
-          placeSearchResult = uiState.placeSearchResult,
-          placeResultOnClick = placeResultOnClick,
-          selectedPlace = uiState.selectedPlace,
-          onPlaceSearchEnter = onPlaceSearchEnter,
-        )
-      }
-    }
+  if (uiState.loadingState == LoadingStates.ERROR) {
+    ErrorOverlay(backOnClick = navigationButtonOnClick)
+  }
+
+  if (uiState.loadingState == LoadingStates.SUCCESS) {
+    navigationButtonOnClick()
   }
 }
 
@@ -105,7 +107,9 @@ private fun EditPostDetailsPreview(
 ) {
   LocalLensTheme {
     EditPostDetails(
-      uiState = EditPostDetailsUiState()
+      uiState = EditPostDetailsUiState(
+        loadingState = LoadingStates.IDLE
+      )
     )
   }
 }

@@ -28,5 +28,14 @@ interface PostRepository {
   suspend fun unfavoritePost(id: String): Pair<Boolean, String>
   suspend fun toggleFavorite(id: String)
   suspend fun getAllPostIds(): List<String>
+  suspend fun updatePost(
+    id: String,
+    caption: String,
+    visibility: String,
+    placeName: String,
+    placeAddress: String,
+    placeLatitude: Double,
+    placeLongitude: Double
+  ): Pair<Boolean, String>
 }
 

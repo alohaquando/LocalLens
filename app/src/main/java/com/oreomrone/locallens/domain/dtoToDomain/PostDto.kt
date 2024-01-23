@@ -11,6 +11,7 @@ fun PostDto.toPost(): Post {
     place = placeDto.toPlace(),
     image = image,
     caption = caption,
+    visibility = visibility,
     timestamp = timestamp,
     favorites = postsFavorites.map { it.toUser() },
     user = userDto.toUser(),
