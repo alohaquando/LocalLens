@@ -25,9 +25,10 @@ import com.oreomrone.locallens.ui.components.BottomMainNavBar
 import com.oreomrone.locallens.ui.components.LoadingOverlay
 import com.oreomrone.locallens.ui.navigation.AppNavHost
 import com.oreomrone.locallens.ui.navigation.BottomMainNavVisibleDestinations
+import com.oreomrone.locallens.ui.tests.TestScreen
+import com.oreomrone.locallens.ui.tests.TestViewModel
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.SessionViewModel
-import com.oreomrone.locallens.ui.tests.TestViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.handleDeeplinks
@@ -57,6 +58,8 @@ class MainActivity : ComponentActivity() {
       val testViewModel: TestViewModel = hiltViewModel()
       val testUiState by testViewModel.uiState.collectAsStateWithLifecycle()
 
+      val testing = false;
+
       LocalLensTheme {
         Scaffold(
           // App main nav bar
@@ -82,23 +85,28 @@ class MainActivity : ComponentActivity() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.surface
           ) {
-            // App main nav host
-            Crossfade(
-              targetState = authUiState.loadingStates,
-              label = "MainActivity Crossfade"
-            ) {
-              when (it) {
-                LoadingStates.SUCCESS -> {
-                  AppNavHost(
-                    navController = appNavController,
-                    startDestination = authUiState.startingDestination!!,
-                    sessionId = authUiState.sessionId,
-                  )
-                }
-                else                  -> {
-                  LoadingOverlay()
+            if (testing.not()) {
+              // App main nav host
+              Crossfade(
+                targetState = authUiState.loadingStates,
+                label = "MainActivity Crossfade"
+              ) {
+                when (it) {
+                  LoadingStates.SUCCESS -> {
+                    AppNavHost(
+                      navController = appNavController,
+                      startDestination = authUiState.startingDestination!!,
+                      sessionId = authUiState.sessionId,
+                    )
+                  }
+
+                  else                  -> {
+                    LoadingOverlay()
+                  }
                 }
               }
+            } else {
+              TestScreen()
             }
           }
         }

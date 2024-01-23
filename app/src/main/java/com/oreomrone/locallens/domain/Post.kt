@@ -8,6 +8,7 @@ data class Post(
   val favorites: List<User> = listOf(),
   val image: Any,
   var user: User? = null,
+  var favoritedByCurrentUser: Boolean = false,
 ) {
   override fun hashCode(): Int {
     return id.hashCode()

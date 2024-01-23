@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -155,38 +156,12 @@ fun PostsMapLayout(
           ) {
             for (post in posts) {
               Post(
-                place = post.place.name,
-                address = post.place.address,
-                caption = post.caption,
-                username = post.user?.username.toString(),
-                date = post.timestamp,
-                favorites = post.favorites.size,
-                postImageModel = post.image,
-                userImageModel = post.user?.image.toString(),
-                isFavorite = false, // TODO
+                postId = post.id,
                 showDivider = true,
                 showUser = true,
-                showMenuButton = false, // TODO
-                navigateOnClick = {
-                  navigateOnClick(
-                    post.place.latitude,
-                    post.place.longitude,
-                    post.place.name
-                  )
-                },
-                favoriteOnClick = {
-                  coroutineScope.launch {
-                    favoriteOnClick(post.id)
-                  }
-                },
                 placeOnClick = { placeOnClick(post.place.id) },
                 userOnClick = { userOnClick(post.user?.id.toString()) },
                 editOnClick = { editOnClick(post.id) },
-                deleteOnClick = {
-                  coroutineScope.launch {
-                    deleteOnClick(post.id)
-                  }
-                },
               )
             }
             Spacer(
@@ -270,30 +245,10 @@ fun PostsMapLayout(
           showModalBottomSheet = false
         }) {
         Column {
-          Post(place = clickedPost!!.place.name,
-            address = clickedPost!!.place.address,
-            caption = clickedPost!!.caption,
-            username = clickedPost!!.user?.username.toString(),
-            date = clickedPost!!.timestamp,
-            favorites = clickedPost!!.favorites.size,
-            postImageModel = clickedPost!!.image,
-            userImageModel = clickedPost!!.user?.image.toString(),
-            isFavorite = false, // TODO
+          Post(
+            postId = clickedPost!!.id,
             showDivider = false,
             showUser = true,
-            showMenuButton = false, // TODO
-            navigateOnClick = {
-              navigateOnClick(
-                clickedPost!!.place.latitude,
-                clickedPost!!.place.longitude,
-                clickedPost!!.place.name
-              )
-            },
-            favoriteOnClick = {
-              coroutineScope.launch {
-                favoriteOnClick(clickedPost!!.id)
-              }
-            },
             placeOnClick = {
               showModalBottomSheet = false
               placeOnClick(clickedPost!!.place.id) },
@@ -303,12 +258,7 @@ fun PostsMapLayout(
             editOnClick = {
               showModalBottomSheet = false
               editOnClick(clickedPost!!.id) },
-            deleteOnClick = {
-              showModalBottomSheet = false
-              coroutineScope.launch {
-                deleteOnClick(clickedPost!!.id)
-              }
-            })
+            )
 
           Spacer(
             modifier = Modifier.height(

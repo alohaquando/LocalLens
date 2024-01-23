@@ -12,6 +12,7 @@ import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Count
+import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.storage.Storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -48,6 +49,26 @@ class PostRepositoryImpl @Inject constructor(
       Log.e(
         "PostRepositoryImpl",
         "getAllPost: $e"
+      )
+      emptyList()
+    }
+  }
+
+  override suspend fun getAllPostIds(): List<String> {
+    return try {
+      val res = postgrest.from(table).select(
+      ){
+        order(column = "timestamp", order = Order.DESCENDING)
+      }.decodeList<String>()
+      Log.d(
+        "PostRepositoryImpl",
+        "getAllPostIds: $res"
+      )
+      res
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getAllPostIds: $e"
       )
       emptyList()
     }

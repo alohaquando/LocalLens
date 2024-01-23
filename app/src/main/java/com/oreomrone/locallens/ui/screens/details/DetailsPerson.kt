@@ -96,7 +96,7 @@ private fun DetailsPerson(
   favoriteOnClick: suspend (String) -> Unit = {},
   deleteOnClick: suspend (String) -> Unit = {},
 ) {
-  val coroutineScope = rememberCoroutineScope()
+
 
   Crossfade(
     targetState = uiState.loadingStates,
@@ -188,38 +188,12 @@ private fun DetailsPerson(
           if (uiState.user != null) {
             for (post in uiState.user.posts) {
               Post(
-                place = post.place.name,
-                address = post.place.address,
-                caption = post.caption,
-                username = uiState.user.username,
-                date = post.timestamp,
-                favorites = post.favorites.size,
-                postImageModel = post.image,
-                userImageModel = uiState.user.image,
-                isFavorite = false,
+                postId = post.id,
                 showDivider = true,
                 showUser = false,
-                showMenuButton = false, // TODO: allow for superUser
-                navigateOnClick = {
-                  navigateOnClick(
-                    post.place.latitude,
-                    post.place.longitude,
-                    post.place.name
-                  )
-                },
-                favoriteOnClick = {
-                  coroutineScope.launch {
-                    favoriteOnClick(post.id)
-                  }
-                },
                 placeOnClick = { placeOnClick(post.place.id) },
-                userOnClick = { userOnClick(uiState.user.id) },
+                userOnClick = {  },
                 editOnClick = { editOnClick(post.id) },
-                deleteOnClick = {
-                  coroutineScope.launch {
-                    deleteOnClick(post.id)
-                  }
-                },
               )
             }
           }

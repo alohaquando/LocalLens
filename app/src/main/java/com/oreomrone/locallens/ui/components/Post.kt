@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -35,22 +36,87 @@ import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
-import com.oreomrone.locallens.ui.utils.jsonTimestampToDateTime
+import com.oreomrone.locallens.ui.utils.PostUiState
+import com.oreomrone.locallens.ui.utils.PostViewModel
 import com.oreomrone.locallens.ui.utils.conditional
+import kotlinx.coroutines.launch
+
+@Composable
+fun Post(
+  postId: String,
+  showDivider: Boolean = true,
+  showUser: Boolean = true,
+  placeOnClick: () -> Unit = {},
+  userOnClick: () -> Unit = {},
+  editOnClick: () -> Unit = {},
+) {
+  val postViewModel: PostViewModel = hiltViewModel(key = postId)
+  val postUiState: PostUiState = postViewModel.uiState.collectAsStateWithLifecycle().value
+
+  val coroutineScope = rememberCoroutineScope()
+
+  LaunchedEffect(Unit) {
+    postViewModel.getPost(postId)
+  }
+
+  val context = LocalContext.current
+  val packageManager = context.packageManager
+
+  Post(
+    place = postUiState.place,
+    address = postUiState.address,
+    caption = postUiState.caption,
+    username = postUiState.username,
+    date = postUiState.date,
+    postImageModel = postUiState.postImageModel,
+    userImageModel = postUiState.userImageModel,
+    favorites = postUiState.favorites.size,
+    isFavorite = postUiState.isFavorite,
+    favoriteLoadingState = postUiState.favoriteLoadingState,
+    showMenuButton = postUiState.showMenuButton,
+
+    showDivider = showDivider,
+    showUser = showUser,
+    navigateOnClick = {
+      coroutineScope.launch {
+        postViewModel.performNavigate(
+          context,
+          packageManager
+        )
+      }
+    },
+    favoriteOnClick = {
+      coroutineScope.launch {
+        postViewModel.performFavoritePost(postId)
+      }
+    },
+    placeOnClick = placeOnClick,
+    userOnClick = userOnClick,
+    promoteOnClick = {  },
+    editOnClick = editOnClick,
+    deleteOnClick = {  },
+  )
+}
 
 @Composable
 fun Post(
@@ -73,6 +139,7 @@ fun Post(
   promoteOnClick: () -> Unit = {},
   editOnClick: () -> Unit = {},
   deleteOnClick: () -> Unit = {},
+  favoriteLoadingState: LoadingStates = LoadingStates.IDLE,
 ) {
   var captionIsOverflowing by remember {
     mutableStateOf(false)
@@ -155,17 +222,28 @@ fun Post(
           }
           IconButton(
             onClick = favoriteOnClick,
-
+            enabled = favoriteLoadingState == LoadingStates.IDLE || favoriteLoadingState == LoadingStates.SUCCESS,
             colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = if (isFavorite.not()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
           ) {
-            Icon(
-              imageVector = if (isFavorite.not()) {
-                Icons.Rounded.FavoriteBorder
-              } else {
-                Icons.Rounded.Favorite
-              },
-              contentDescription = "Toggle favorite of this post",
-            )
+            when (favoriteLoadingState) {
+              LoadingStates.LOADING -> {
+                CircularProgressIndicator(
+                  modifier = Modifier.size(24.dp),
+
+                )
+              }
+
+              else                  -> {
+                Icon(
+                  imageVector = if (isFavorite.not()) {
+                    Icons.Rounded.FavoriteBorder
+                  } else {
+                    Icons.Rounded.Favorite
+                  },
+                  contentDescription = "Toggle favorite of this post",
+                )
+              }
+            }
           }
 
           if (showMenuButton) {
@@ -270,7 +348,7 @@ fun Post(
           verticalAlignment = Alignment.CenterVertically
         ) {
           Text(
-            text = jsonTimestampToDateTime(date),
+            text = date,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
           )
         }
@@ -387,8 +465,7 @@ private fun PostPreview() {
     Post(
       place = "Post Office Square Park, Memorial Monument",
       address = "130 Congress St, Boston, MA 02110, United States",
-      caption = "Captured one of my favorite places on a beautiful Sunday morning. Nothing better" +
-              " than this. I love being here so much, as it is so peaceful and beautiful. I love the architecture of the buildings. Honestly, I think this is one of the best places in Boston. There's so much to do here, and it's so interesting.",
+      caption = "Captured one of my favorite places on a beautiful Sunday morning. Nothing better" + " than this. I love being here so much, as it is so peaceful and beautiful. I love the architecture of the buildings. Honestly, I think this is one of the best places in Boston. There's so much to do here, and it's so interesting.",
       isFavorite = true,
       favorites = 59659,
       username = "oreomrone_the_explorer",
@@ -412,6 +489,7 @@ fun PostPreviewShort() {
       showMenuButton = true,
       favorites = 59659,
       username = "oreomrone_the_explorer",
+      favoriteLoadingState = LoadingStates.LOADING,
       date = "2024-01-22 13:03:58.590832+00",
       postImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
       userImageModel = "https://images.unsplash.com/photo-1632835034837-4b8b9b5b9b9f?ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw0Mnx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"

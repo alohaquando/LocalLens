@@ -47,11 +47,6 @@ fun Me(
   val viewModel: MeViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-  val postViewModel: PostViewModel = hiltViewModel()
-
-  val context = LocalContext.current
-  val packageManager = context.packageManager
-
   Me(
     uiState = uiState,
     backOnClick = backOnClick,
@@ -63,17 +58,6 @@ fun Me(
     placeOnClick = placeOnClick,
     userOnClick = userOnClick,
     editOnClick = editOnClick,
-    navigateOnClick = { lat: Double, long: Double, name: String ->
-      postViewModel.performNavigate(
-        lat,
-        long,
-        name,
-        context,
-        packageManager
-      )
-    },
-    favoriteOnClick = postViewModel::performFavoritePost,
-    deleteOnClick = postViewModel::performDeletePost,
   )
 }
 
@@ -92,11 +76,7 @@ private fun Me(
   placeOnClick: (String) -> Unit = {},
   userOnClick: (String) -> Unit = {},
   editOnClick: (String) -> Unit = {},
-  navigateOnClick: (Double, Double, String) -> Unit = { _, _, _ -> },
-  favoriteOnClick: suspend (String) -> Unit = {},
-  deleteOnClick: suspend (String) -> Unit = {},
 ) {
-  val coroutineScope = rememberCoroutineScope()
 
   DetailsLayout(title = if (uiState.user != null) "@${uiState.user.username}" else "",
     subtitle = uiState.user?.name ?: "",
@@ -175,38 +155,12 @@ private fun Me(
     if (uiState.user != null) {
       for (post in uiState.user.posts) {
         Post(
-          place = post.place.name,
-          address = post.place.address,
-          caption = post.caption,
-          username = uiState.user.username,
-          date = post.timestamp,
-          favorites = post.favorites.size,
-          postImageModel = post.image,
-          userImageModel = uiState.user.image,
-          isFavorite = false,
+          postId = post.id,
           showDivider = true,
           showUser = false,
-          showMenuButton = true,
-          navigateOnClick = {
-            navigateOnClick(
-              post.place.latitude,
-              post.place.longitude,
-              post.place.name
-            )
-          },
-          favoriteOnClick = {
-            coroutineScope.launch {
-              favoriteOnClick(post.id)
-            }
-          },
           placeOnClick = { placeOnClick(post.place.id) },
-          userOnClick = { userOnClick(uiState.user.id) },
+          userOnClick = { userOnClick(post.user?.id.toString()) },
           editOnClick = { editOnClick(post.id) },
-          deleteOnClick = {
-            coroutineScope.launch {
-              deleteOnClick(post.id)
-            }
-          },
         )
       }
     }

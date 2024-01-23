@@ -127,38 +127,12 @@ private fun DetailsPlace(
           if (uiState.place != null) {
             for (post in uiState.place.posts) {
               Post(
-                place = post.place.name,
-                address = post.place.address,
-                caption = post.caption,
-                username = post.user?.username.toString(),
-                date = post.timestamp,
-                favorites = post.favorites.size,
-                postImageModel = post.image,
-                userImageModel = post.user?.image.toString(),
-                isFavorite = false,
+                postId = post.id,
                 showDivider = true,
                 showUser = true,
-                showMenuButton = false, // TODO: allow for superUser
-                navigateOnClick = {
-                  navigateOnClick(
-                    post.place.latitude,
-                    post.place.longitude,
-                    post.place.name
-                  )
-                },
-                favoriteOnClick = {
-                  coroutineScope.launch {
-                    favoriteOnClick(post.id)
-                  }
-                },
-                placeOnClick = { },
+                placeOnClick = {  },
                 userOnClick = { userOnClick(post.user?.id.toString()) },
                 editOnClick = { editOnClick(post.id) },
-                deleteOnClick = {
-                  coroutineScope.launch {
-                    deleteOnClick(post.id)
-                  }
-                },
               )
             }
           }
