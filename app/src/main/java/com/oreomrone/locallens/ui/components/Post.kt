@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.SupervisedUserCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,11 +59,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oreomrone.locallens.domain.LoadingStates
+import com.oreomrone.locallens.domain.PostVisibilities
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.PostUiState
 import com.oreomrone.locallens.ui.utils.PostViewModel
 import com.oreomrone.locallens.ui.utils.conditional
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun Post(
@@ -90,6 +95,7 @@ fun Post(
     caption = postUiState.caption,
     username = postUiState.username,
     date = postUiState.date,
+    visibility = postUiState.visibility,
     postImageModel = postUiState.postImageModel,
     userImageModel = postUiState.userImageModel,
     favorites = postUiState.favorites.size,
@@ -126,6 +132,7 @@ fun Post(
   )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Post(
   place: String = "Place Name",
@@ -150,6 +157,7 @@ fun Post(
   deleteOnClick: () -> Unit = {},
   afterDeletionCallback: () -> Unit = {},
   favoriteLoadingState: LoadingStates = LoadingStates.IDLE,
+  visibility: String = PostVisibilities.PUBLIC.name,
 ) {
   var captionIsOverflowing by remember {
     mutableStateOf(false)
@@ -359,10 +367,10 @@ fun Post(
 
             Spacer(modifier = Modifier.size(4.dp))
 
-            Row(
+            FlowRow(
               modifier = Modifier.padding(horizontal = 16.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp)
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
               Row(
                 verticalAlignment = Alignment.CenterVertically
@@ -376,7 +384,9 @@ fun Post(
               Icon(
                 imageVector = Icons.Rounded.Circle,
                 contentDescription = "Circle",
-                modifier = Modifier.size(4.dp),
+                modifier = Modifier
+                  .padding(vertical = 9.dp)
+                  .size(4.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
               )
 
@@ -397,6 +407,41 @@ fun Post(
                 )
                 Text(
                   text = "fav" + if (favorites != 1) "s" else "",
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+              }
+
+              Icon(
+                imageVector = Icons.Rounded.Circle,
+                contentDescription = "Circle",
+                modifier = Modifier
+                  .padding(vertical = 9.dp)
+                  .size(4.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+              )
+
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+              ) {
+                Icon(
+                  imageVector = Icons.Rounded.SupervisedUserCircle,
+                  contentDescription = "Visible to",
+                  modifier = Modifier.size(16.dp),
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                Text(
+                  text = "Visible to",
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                Text(
+                  text = when(visibility) {
+                    PostVisibilities.PUBLIC.name -> "everyone"
+                    PostVisibilities.PRIVATE.name -> "followers"
+                    PostVisibilities.ME.name -> "just me"
+                    else -> "everyone"
+                  },
                   color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
               }

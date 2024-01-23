@@ -100,8 +100,7 @@ object SampleData {
 
   val sampleMessage2 = Message(
     sampleUser2,
-    "Here's to the countless more memories we'll create and the adventures that lie ahead. Cheers" +
-            " to our journey!",
+    "Here's to the countless more memories we'll create and the adventures that lie ahead. Cheers" + " to our journey!",
     "12:05"
   )
 
@@ -116,21 +115,21 @@ object SampleData {
       sampleMessage1,
       sampleMessage,
       sampleMessage1,
-      sampleMessage,
       sampleMessage1,
       sampleMessage,
       sampleMessage1,
       sampleMessage,
       sampleMessage1,
       sampleMessage,
-      sampleMessage1,
       sampleMessage,
       sampleMessage1,
       sampleMessage,
       sampleMessage1,
       sampleMessage,
+      sampleMessage,
       sampleMessage1,
       sampleMessage,
+      sampleMessage1,
       sampleMessage1,
     ),
     lastUpdated = "12:00",

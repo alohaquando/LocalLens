@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oreomrone.locallens.domain.User
+import com.oreomrone.locallens.ui.utils.SampleData
 import com.oreomrone.locallens.ui.utils.getCurrentUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +38,10 @@ class MessagesListViewModel @Inject constructor(
   }
 
   private suspend fun getThreads(userId: String) {
-    var threads = emptyList<MessageThread>() // TODO
+    var threads = listOf(
+      SampleData.sampleThread,
+      SampleData.sampleThread1
+    ) // TODO
     threads = sortThreads(threads)
     _uiState.update { currentState ->
       currentState.copy(threads = threads)
@@ -60,7 +64,10 @@ class MessagesListViewModel @Inject constructor(
 }
 
 data class MessagesListUiState(
-  val threads: List<MessageThread> = emptyList(),
+  val threads: List<MessageThread> = listOf(
+    SampleData.sampleThread,
+    SampleData.sampleThread1
+  ),
   val currentUser: User? = null, // TODO
   val isLoading: Boolean = false,
   val isError: Boolean = false,

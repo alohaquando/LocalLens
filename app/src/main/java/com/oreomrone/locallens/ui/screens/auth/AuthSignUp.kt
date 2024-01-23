@@ -94,7 +94,7 @@ fun AuthSignUp(
     googleAuthOnClick = { googleAuthAction.startFlow() },
     signUpOnClick = viewModel::onSignUp,
     signInOnClick = signInOnClick,
-    navigateToCompleteProfile = navigateToCompleteProfile
+//    navigateToCompleteProfile = navigateToCompleteProfile
   )
 }
 

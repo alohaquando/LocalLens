@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oreomrone.locallens.domain.LoadingStates
 import com.oreomrone.locallens.domain.User
+import com.oreomrone.locallens.ui.utils.SampleData
 import com.oreomrone.locallens.ui.utils.getCurrentUser
 import com.oreomrone.locallens.ui.utils.getRecipientFromThreadParticipantsPair
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,19 +32,19 @@ class MessagesDetailsViewModel @Inject constructor(
   }
 
   private suspend fun initializeUiState() {
-    if (id === null) {
-      logAndSetError("id is null")
-      return
-    }
+//    if (id === null) {
+//      logAndSetError("id is null")
+//      return
+//    }
 
     viewModelScope.launch {
-      val currentUser = getCurrentUser()
-      if (currentUser === null) {
-        logAndSetError("currentUser is null")
-        return@launch
-      }
+//      val currentUser = getCurrentUser()
+//      if (currentUser === null) {
+//        logAndSetError("currentUser is null")
+//        return@launch
+//      }
 
-      val thread = getThread(id)
+      val thread = SampleData.sampleThread
       if (thread === null) {
         logAndSetError("thread is null")
         return@launch
@@ -51,11 +52,11 @@ class MessagesDetailsViewModel @Inject constructor(
 
       _uiState.update { currentState ->
         currentState.copy(
-          currentUser = currentUser,
+          currentUser = SampleData.sampleUser1,
           thread = thread,
           recipient = getRecipientFromThreadParticipantsPair(
             participants = thread.participants,
-            currentUser = currentUser,
+            currentUser = SampleData.sampleUser1,
           ),
           loadingState =  LoadingStates.SUCCESS
         )

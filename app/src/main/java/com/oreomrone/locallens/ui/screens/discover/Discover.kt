@@ -82,6 +82,7 @@ fun Discover(
     },
     favoriteOnClick = postViewModel::performFavoritePost,
     deleteOnClick = postViewModel::performDeletePost,
+    refreshOnClick = viewModel::initializeUiState,
   )
 }
 
@@ -95,6 +96,7 @@ private fun Discover(
   editOnClick: (String) -> Unit = {},
   favoriteOnClick: suspend (String) -> Unit = {},
   deleteOnClick: suspend (String) -> Unit = {},
+  refreshOnClick:suspend () -> Unit = {},
 ) {
   val coroutineScope = rememberCoroutineScope()
 
@@ -171,7 +173,7 @@ private fun Discover(
         }
 
         // All posts
-        else -> {
+        else                  -> {
           Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
             Spacer(modifier = Modifier.height(innerPadding.calculateTopPadding()))
             if (uiState.posts.isEmpty()) {
@@ -183,44 +185,22 @@ private fun Discover(
                   .padding(
                     horizontal = 16.dp,
                     vertical = 24.dp
-                  ).alpha(0.7f)
+                  )
+                  .alpha(0.7f)
               )
             } else {
               for (post in uiState.posts) {
-                Post(
-                  place = post.place.name,
-                  address = post.place.address,
-                  caption = post.caption,
-                  username = post.user?.username.toString(),
-                  date = post.timestamp,
-                  favorites = post.favorites.size,
-                  postImageModel = post.image,
-                  userImageModel = post.user?.image.toString(),
-                  isFavorite = false,
+                Post(postId = post.id,
                   showDivider = true,
-                  showUser = false,
-                  showMenuButton = false, // TODO
-                  navigateOnClick = {
-                    navigateOnClick(
-                      post.place.latitude,
-                      post.place.longitude,
-                      post.place.name
-                    )
-                  },
-                  favoriteOnClick = {
-                    coroutineScope.launch {
-                      favoriteOnClick(post.id)
-                    }
-                  },
+                  showUser = true,
                   placeOnClick = { placeOnClick(post.place.id) },
                   userOnClick = { userOnClick(post.user?.id.toString()) },
                   editOnClick = { editOnClick(post.id) },
-                  deleteOnClick = {
+                  afterDeletionCallback = {
                     coroutineScope.launch {
-                      deleteOnClick(post.id)
+                      refreshOnClick()
                     }
-                  },
-                )
+                  })
               }
             }
           }

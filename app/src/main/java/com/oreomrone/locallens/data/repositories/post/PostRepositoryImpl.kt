@@ -6,6 +6,7 @@ import com.oreomrone.locallens.data.dto.PostFavoriteDto
 import com.oreomrone.locallens.data.repositories.place.PlaceRepository
 import com.oreomrone.locallens.data.utils.BuildProfileImageUrl
 import com.oreomrone.locallens.data.utils.cleanQueryString
+import io.github.jan.supabase.exceptions.HttpRequestException
 import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.postgrest.Postgrest
@@ -57,6 +58,13 @@ class PostRepositoryImpl @Inject constructor(
       )
       emptyList()
     }
+    catch (e: HttpRequestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getAllPost: $e"
+      )
+      emptyList()
+    }
   }
 
   override suspend fun getAllPostIds(): List<String> {
@@ -79,6 +87,12 @@ class PostRepositoryImpl @Inject constructor(
       )
       emptyList()
     } catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getAllPostIds: $e"
+      )
+      emptyList()
+    }catch (e: HttpRequestException) {
       Log.e(
         "PostRepositoryImpl",
         "getAllPostIds: $e"
@@ -113,6 +127,13 @@ class PostRepositoryImpl @Inject constructor(
       )
       null
     } catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPost: $e"
+      )
+      null
+    }
+    catch (e: HttpRequestException) {
       Log.e(
         "PostRepositoryImpl",
         "getPost: $e"
@@ -160,6 +181,15 @@ class PostRepositoryImpl @Inject constructor(
         "Failed to favorite post. ${e.message?.take(50)}..."
       )
     } catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "favoritePost: $e"
+      )
+      Pair(
+        false,
+        "Failed to favorite post. ${e.message?.take(50)}..."
+      )
+    } catch (e: HttpRequestException) {
       Log.e(
         "PostRepositoryImpl",
         "favoritePost: $e"
@@ -216,6 +246,15 @@ class PostRepositoryImpl @Inject constructor(
         "Failed to unfavorite post. ${e.message?.take(50)}..."
       )
     } catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "unfavoritePost: $e"
+      )
+      Pair(
+        false,
+        "Failed to unfavoritePost post. ${e.message?.take(50)}..."
+      )
+    } catch (e: HttpRequestException) {
       Log.e(
         "PostRepositoryImpl",
         "unfavoritePost: $e"
@@ -373,6 +412,12 @@ class PostRepositoryImpl @Inject constructor(
         "getPostsByUserId: $e"
       )
       emptyList()
+    }catch (e: HttpRequestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPostsByPlaceId: $e"
+      )
+      emptyList()
     }
   }
 
@@ -402,6 +447,12 @@ class PostRepositoryImpl @Inject constructor(
       )
       emptyList()
     } catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPostsByUserId: $e"
+      )
+      emptyList()
+    }catch (e: HttpRequestException) {
       Log.e(
         "PostRepositoryImpl",
         "getPostsByUserId: $e"
@@ -522,6 +573,15 @@ class PostRepositoryImpl @Inject constructor(
         false,
         e.message ?: "An error occurred. ${e.message?.take(50)}..."
       )
+    }catch (e: HttpRequestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "updatePost: $e"
+      )
+      Pair(
+        false,
+        e.message ?: "An error occurred. ${e.message?.take(50)}..."
+      )
     }
   }
 
@@ -563,6 +623,16 @@ class PostRepositoryImpl @Inject constructor(
         e.message ?: "An error occurred. ${e.message?.take(50)}..."
       )
     } catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "deletePost: $e"
+      )
+      Pair(
+        false,
+        e.message ?: "An error occurred. ${e.message?.take(50)}..."
+      )
+    }
+    catch (e: HttpRequestException) {
       Log.e(
         "PostRepositoryImpl",
         "deletePost: $e"

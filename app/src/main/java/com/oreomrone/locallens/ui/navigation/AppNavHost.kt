@@ -426,7 +426,7 @@ fun AppNavHost(
     ) {
       Notifications(
         backOnClick = { navController.popBackStack() },
-        notificationOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
+//        notificationOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
       )
     }
     //endregion

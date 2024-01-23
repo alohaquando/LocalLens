@@ -32,6 +32,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.oreomrone.locallens.domain.AppNotification
 import com.oreomrone.locallens.ui.components.Image
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
+import com.oreomrone.locallens.ui.utils.jsonTimestampToDateTime
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -101,7 +102,7 @@ private fun Notifications(
             },
             headlineContent = { Text(notification.content) },
             supportingContent = {
-              Text(text = notification.timestamp)
+              Text(text = jsonTimestampToDateTime(notification.timestamp))
             },
             modifier = Modifier.clickable {
               notificationOnClick(notification.destination)
@@ -128,7 +129,7 @@ private fun NotificationsPreview() {
             id = "1",
             image = "https://picsum.photos/200/300",
             content = "This is a notification",
-            timestamp = "2021-09-01T00:00:00.000Z",
+            timestamp = "2024-01-22T13:03:58.590832+00:00",
             destination = "https://www.google.com",
           ),
           AppNotification(
