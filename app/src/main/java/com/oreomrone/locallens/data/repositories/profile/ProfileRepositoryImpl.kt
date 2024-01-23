@@ -177,7 +177,6 @@ class ProfileRepositoryImpl @Inject constructor(
     }
   }
 
-
   override suspend fun getFollowersById(id: String): List<ProfileDto> {
     return try {
       val res = postgrest.from("follows").select(
@@ -241,6 +240,39 @@ class ProfileRepositoryImpl @Inject constructor(
         "getFollowingsById: $e"
       )
       emptyList()
+    }
+  }
+
+  override suspend fun getIsSuperUserById(id: String): Boolean {
+    return try {
+      val res = postgrest.from(table).select(Columns.list("is_super_user")) {
+        filter {
+          eq(
+            "id",
+            id
+          )
+        }
+      }.decodeSingleOrNull<ProfileDto>()
+
+      if (res !== null) {
+        Log.d(
+          "ProfileRepositoryImpl",
+          "getIsSuperUserById: ${res.isSuperUser}"
+        )
+        res.isSuperUser
+      } else {
+        Log.e(
+          "ProfileRepositoryImpl",
+          "getIsSuperUserById: res is null"
+        )
+        false
+      }
+    } catch (e: RestException) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "getIsSuperUserById: $e"
+      )
+      false
     }
   }
 }

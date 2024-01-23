@@ -20,5 +20,6 @@ interface ProfileRepository {
   suspend fun getFollowersById(id: String): List<ProfileDto>
 
   suspend fun getFollowingsById(id: String): List<ProfileDto>
+  suspend fun getIsSuperUserById(id: String): Boolean
 }
 
