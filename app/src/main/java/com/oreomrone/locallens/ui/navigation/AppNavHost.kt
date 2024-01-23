@@ -11,6 +11,7 @@ import com.oreomrone.locallens.ui.screens.accountSettings.AccountSettings
 import com.oreomrone.locallens.ui.screens.accountSettings.changeEmail.AccountSettingsChangeEmailNew
 import com.oreomrone.locallens.ui.screens.accountSettings.changePassword.AccountSettingsChangePasswordNew
 import com.oreomrone.locallens.ui.screens.accountSettings.changeProfile.AccountSettingsChangeProfile
+import com.oreomrone.locallens.ui.screens.accountSettings.manageOtherAccounts.ManageOtherAccounts
 import com.oreomrone.locallens.ui.screens.accountSettings.support.Support
 import com.oreomrone.locallens.ui.screens.auth.AuthSignIn
 import com.oreomrone.locallens.ui.screens.auth.AuthSignUp
@@ -94,6 +95,11 @@ fun AppNavHost(
             AppNavDests.AccountSettingsChangeEmailNew.name
           )
         },
+        manageOtherAccountOnClick = {
+          navController.navigate(
+            AppNavDests.ManageOtherAccounts.name
+          )
+        },
         supportOnClick = { navController.navigate(AppNavDests.Support.name) },
       )
     }
@@ -145,6 +151,19 @@ fun AppNavHost(
     }
 
     composable(
+      AppNavDests.ManageOtherAccounts.name,
+      enterTransition = enterHorizontalTransition,
+      exitTransition = exitHorizontalTransition,
+      popEnterTransition = popEnterHorizontalTransition,
+      popExitTransition = popExitHorizontalTransition,
+    ) {
+      ManageOtherAccounts(
+        backOnClick = { navController.popBackStack() },
+        userOnClick = { navController.navigate(destinationPersonDetailsOrMe(it)) },
+      )
+    }
+
+    composable(
       AppNavDests.Support.name,
       enterTransition = enterHorizontalTransition,
       exitTransition = exitHorizontalTransition,
@@ -152,7 +171,7 @@ fun AppNavHost(
       popExitTransition = popExitHorizontalTransition,
     ) {
       Support(
-        onBackClicked = { navController.popBackStack() },
+        backOnClick = { navController.popBackStack() },
       )
     }
     //endregion

@@ -51,8 +51,15 @@ class PostRepositoryImpl @Inject constructor(
         "getAllPost: $e"
       )
       emptyList()
+    }catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getAllPost: $e"
+      )
+      emptyList()
     }
   }
+
 
   override suspend fun getAllPostIds(): List<String> {
     return try {
@@ -66,6 +73,13 @@ class PostRepositoryImpl @Inject constructor(
       )
       res
     } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getAllPostIds: $e"
+      )
+      emptyList()
+    }
+    catch (e: Exception) {
       Log.e(
         "PostRepositoryImpl",
         "getAllPostIds: $e"
@@ -94,6 +108,13 @@ class PostRepositoryImpl @Inject constructor(
       )
       res
     } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPost: $e"
+      )
+      null
+    }
+    catch (e: Exception) {
       Log.e(
         "PostRepositoryImpl",
         "getPost: $e"

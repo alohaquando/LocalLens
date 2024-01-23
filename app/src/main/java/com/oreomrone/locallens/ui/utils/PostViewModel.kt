@@ -50,7 +50,17 @@ class PostViewModel @Inject constructor(
       }
 
       val currentUserId = auth.currentUserOrNull()?.id
+      val currentUserIsSuperUser = profileRepository.getIsSuperUserById(currentUserId ?: "")
 
+      if (post.user?.id == currentUserId || currentUserIsSuperUser) {
+        _uiState.update { currentState ->
+          currentState.copy(
+            showMenuButton = true
+          )
+        }
+      }
+
+      //region Favorite
       if (post.favorites.isEmpty()) {
         _uiState.update { currentState ->
           currentState.copy(
@@ -59,13 +69,6 @@ class PostViewModel @Inject constructor(
         }
       }
 
-      if (post.user?.id == currentUserId) {
-        _uiState.update { currentState ->
-          currentState.copy(
-            showMenuButton = true
-          )
-        }
-      }
 
       for (user in post.favorites) {
         if (user.id == currentUserId) {
@@ -83,6 +86,7 @@ class PostViewModel @Inject constructor(
           }
         }
       }
+      //endregion
     }
   }
 

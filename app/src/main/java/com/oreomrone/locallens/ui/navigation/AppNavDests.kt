@@ -8,6 +8,7 @@ enum class AppNavDests {
 //  AccountSettingsChangePasswordConfirm,
   AccountSettingsChangePasswordNew,
   AccountSettingsChangeProfile,
+  ManageOtherAccounts,
   Support,
 
   // Auth

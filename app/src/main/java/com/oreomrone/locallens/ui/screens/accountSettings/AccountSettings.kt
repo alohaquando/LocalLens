@@ -44,7 +44,8 @@ fun AccountSettings(
   changePasswordOnClick: () -> Unit = {},
   changeEmailOnClick: () -> Unit = {},
   supportOnClick: () -> Unit = {},
-) {
+  manageOtherAccountOnClick: () -> Unit = {},
+  ) {
   val viewModel: AccountSettingsViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -55,6 +56,7 @@ fun AccountSettings(
     changeEmailOnClick = changeEmailOnClick,
     supportOnClick = supportOnClick,
     signOutOnClick = viewModel::performSignOut,
+    manageOtherAccountOnClick = manageOtherAccountOnClick,
   )
 }
 
@@ -67,6 +69,7 @@ private fun AccountSettings(
   changeEmailOnClick: () -> Unit = {},
   supportOnClick: () -> Unit = {},
   signOutOnClick: suspend () -> Unit = {},
+  manageOtherAccountOnClick: () -> Unit = {},
 ) {
   val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
   val coroutineScope = rememberCoroutineScope()
@@ -104,11 +107,24 @@ private fun AccountSettings(
     ) {
 
       if (uiState.isSuperUser) {
-        Alert(
-          Icons.Rounded.VerifiedUser,
-          "You are using a Super User account",
-          "You can edit all posts and promote posts for free"
-        )
+        Column {
+          Alert(
+            Icons.Rounded.VerifiedUser,
+            "You are using a Super User account",
+            "You can edit all posts and promote posts for free. You can also manage other accounts."
+          )
+          ListItem(
+            headlineContent = { Text("Manage other accounts") },
+            trailingContent = {
+              Icon(
+                Icons.Default.ArrowRight,
+                contentDescription = "Next"
+              )
+            },
+            modifier = Modifier.clickable(onClick = manageOtherAccountOnClick)
+          )
+          Divider()
+        }
       }
 
       ListItem(

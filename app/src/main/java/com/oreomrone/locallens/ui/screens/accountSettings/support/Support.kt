@@ -39,7 +39,7 @@ import com.oreomrone.locallens.ui.theme.LocalLensTheme
 
 @Composable
 fun Support(
-  onBackClicked: () -> Unit = {},
+  backOnClick: () -> Unit = {},
 ) {
   val viewModel: SupportViewModel = hiltViewModel()
   val uiState by viewModel.uiState.collectAsStateWithLifecycle()
