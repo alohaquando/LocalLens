@@ -122,7 +122,8 @@ private fun DetailsPerson(
       else                  -> {
         val coroutineScope = rememberCoroutineScope()
 
-        DetailsLayout(title = if (uiState.user != null) "@${uiState.user.username}" else "",
+        DetailsLayout(
+          title = if (uiState.user != null) "@${uiState.user.username}" else "",
           subtitle = uiState.user?.name ?: "",
           image = uiState.user?.image ?: "",
           ternaryText = uiState.user?.bio ?: "",

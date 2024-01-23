@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
@@ -28,7 +27,6 @@ import com.oreomrone.locallens.ui.components.Post
 import com.oreomrone.locallens.ui.components.StatItemButton
 import com.oreomrone.locallens.ui.components.layouts.DetailsLayout
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
-import com.oreomrone.locallens.ui.utils.PostViewModel
 import com.oreomrone.locallens.ui.utils.SampleData
 import kotlinx.coroutines.launch
 
@@ -80,7 +78,8 @@ private fun Me(
   refreshOnClick: suspend () -> Unit = {},
 ) {
 
-  DetailsLayout(title = if (uiState.user != null) "@${uiState.user.username}" else "",
+  DetailsLayout(
+    title = if (uiState.user != null) "@${uiState.user.username}" else "",
     subtitle = uiState.user?.name ?: "",
     image = uiState.user?.image ?: "",
     ternaryText = uiState.user?.bio ?: "",

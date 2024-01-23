@@ -3,6 +3,7 @@ package com.oreomrone.locallens.data.repositories.profile
 import android.util.Log
 import com.oreomrone.locallens.data.dto.FollowingsDto
 import com.oreomrone.locallens.data.dto.FollowsDto
+import com.oreomrone.locallens.data.dto.PlaceDto
 import com.oreomrone.locallens.data.dto.ProfileDto
 import com.oreomrone.locallens.data.dto.ProfilesWrapperDto
 import com.oreomrone.locallens.data.utils.BuildProfileImageUrl
@@ -409,6 +410,27 @@ class ProfileRepositoryImpl @Inject constructor(
       unfollowProfile(id)
     } else {
       followProfile(id)
+    }
+  }
+
+  override suspend fun getProfilesByUsername(username: String): List<ProfileDto> {
+    return try {
+      val res = postgrest.from(table).select {
+        filter {
+          ilike("username", "*${username}*")
+        }
+      }.decodeList<ProfileDto>()
+      Log.d(
+        "ProfileRepositoryImpl",
+        "getProfilesByUsername: $res"
+      )
+      res
+    } catch (e: RestException) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "getProfilesByUsername: $e"
+      )
+      emptyList()
     }
   }
 }

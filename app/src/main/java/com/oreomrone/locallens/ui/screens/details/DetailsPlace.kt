@@ -95,9 +95,13 @@ private fun DetailsPlace(
       }
 
       else -> {
-        DetailsLayout(title = if (uiState.place != null) uiState.place.name else "",
+        DetailsLayout(
+          title = if (uiState.place != null) uiState.place.name else "",
           subtitle = uiState.place?.address ?: "",
-          image = uiState.place?.posts?.get(0)?.image ?: "",
+          image = if(uiState.place?.posts?.isNotEmpty() == true)
+            uiState.place.posts.get(0).image
+          else
+            "",
           showBackButton = true,
           backOnClick = backOnClick,
           isLoading = uiState.place == null,
@@ -127,7 +131,7 @@ private fun DetailsPlace(
             }
           }
         ) {
-          if (uiState.place != null) {
+          if (uiState.place != null && uiState.place.posts.isNotEmpty()) {
             for (post in uiState.place.posts) {
               Post(
                 postId = post.id,

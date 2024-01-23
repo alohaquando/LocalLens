@@ -1,13 +1,17 @@
 package com.oreomrone.locallens.ui.components.layouts
 
+import android.Manifest
 import android.content.res.Configuration
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
@@ -17,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.BottomSheetScaffold
@@ -47,7 +52,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -68,7 +74,8 @@ import kotlinx.coroutines.launch
 
 @OptIn(
   ExperimentalMaterial3Api::class,
-  MapsComposeExperimentalApi::class
+  MapsComposeExperimentalApi::class,
+  ExperimentalPermissionsApi::class
 )
 @Composable
 fun PostsMapLayout(
@@ -111,9 +118,21 @@ fun PostsMapLayout(
     )
   )
 
+  // Location permission
+  val locationPermissionState = rememberMultiplePermissionsState(
+    listOf(
+      Manifest.permission.ACCESS_COARSE_LOCATION,
+      Manifest.permission.ACCESS_FINE_LOCATION
+    )
+  )
+  var locationPermissionGranted by remember {
+    mutableStateOf(false)
+  }
+
   BottomSheetScaffold(scaffoldState = scaffoldState,
     sheetDragHandle = {},
     sheetPeekHeight = screenHeight / 3,
+
     // Sheet content
     sheetContent = {
 
@@ -155,8 +174,7 @@ fun PostsMapLayout(
               .padding(it)
           ) {
             for (post in posts) {
-              Post(
-                postId = post.id,
+              Post(postId = post.id,
                 showDivider = true,
                 showUser = true,
                 placeOnClick = { placeOnClick(post.place.id) },
@@ -166,8 +184,7 @@ fun PostsMapLayout(
                   coroutineScope.launch {
                     refreshOnClick()
                   }
-                }
-              )
+                })
             }
             Spacer(
               modifier = Modifier.height(
@@ -197,7 +214,8 @@ fun PostsMapLayout(
             )
           } else {
             null
-          }
+          },
+          isMyLocationEnabled = locationPermissionGranted,
         ),
         uiSettings = MapUiSettings(
           zoomControlsEnabled = false,
@@ -217,23 +235,55 @@ fun PostsMapLayout(
           })
       }
 
-      Box(
-        modifier = Modifier
-          .padding(
-            top = WindowInsets.systemBars
-              .asPaddingValues()
-              .calculateTopPadding(),
-          )
-          .padding(
-            vertical = 8.dp,
-            horizontal = 12.dp
-          )
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
       ) {
-        if (showBackButton) {
-          FilledTonalIconButton(onClick = backOnClick) {
+        Box(
+          modifier = Modifier
+            .padding(
+              top = WindowInsets.systemBars
+                .asPaddingValues()
+                .calculateTopPadding(),
+            )
+            .padding(
+              vertical = 8.dp,
+              horizontal = 12.dp
+            )
+        ) {
+          if (showBackButton) {
+            FilledTonalIconButton(onClick = backOnClick) {
+              Icon(
+                imageVector = Icons.Outlined.ArrowBack,
+                contentDescription = "Back",
+              )
+            }
+          }
+        }
+
+        Box(
+          modifier = Modifier
+            .padding(
+              top = WindowInsets.systemBars
+                .asPaddingValues()
+                .calculateTopPadding(),
+            )
+            .padding(
+              vertical = 8.dp,
+              horizontal = 12.dp
+            )
+        ) {
+          FilledTonalIconButton(onClick = {
+            if (locationPermissionState.allPermissionsGranted) {
+              locationPermissionGranted = true
+            } else {
+              locationPermissionState.launchMultiplePermissionRequest()
+            }
+
+          }) {
             Icon(
-              imageVector = Icons.Outlined.ArrowBack,
-              contentDescription = "Back",
+              imageVector = Icons.Outlined.MyLocation,
+              contentDescription = "My Location",
             )
           }
         }
@@ -250,25 +300,26 @@ fun PostsMapLayout(
           showModalBottomSheet = false
         }) {
         Column {
-          Post(
-            postId = clickedPost!!.id,
+          Post(postId = clickedPost!!.id,
             showDivider = false,
             showUser = true,
             placeOnClick = {
               showModalBottomSheet = false
-              placeOnClick(clickedPost!!.place.id) },
+              placeOnClick(clickedPost!!.place.id)
+            },
             userOnClick = {
               showModalBottomSheet = false
-              userOnClick(clickedPost!!.user?.id.toString()) },
+              userOnClick(clickedPost!!.user?.id.toString())
+            },
             editOnClick = {
               showModalBottomSheet = false
-              editOnClick(clickedPost!!.id) },
+              editOnClick(clickedPost!!.id)
+            },
             afterDeletionCallback = {
               coroutineScope.launch {
                 refreshOnClick()
               }
-            }
-            )
+            })
 
           Spacer(
             modifier = Modifier.height(
@@ -297,7 +348,7 @@ fun PostsMapPreview() {
         10.777263208853345,
         106.69534102887356
       ),
-      showBackButton = true
+      showBackButton = false
     )
   }
 }

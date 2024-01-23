@@ -61,5 +61,9 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBGJm4FHAYg8fs_xcFKPbXn5E9xXz-HDyU" />
 
+        <service
+            android:name=".MainActivity"
+            android:foregroundServiceType="location" />
+
     </application>
 </manifest>

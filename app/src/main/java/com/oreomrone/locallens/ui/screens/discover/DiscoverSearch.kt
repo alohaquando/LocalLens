@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Close
@@ -38,6 +40,7 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.oreomrone.locallens.ui.components.Image
 import com.oreomrone.locallens.ui.theme.LocalLensTheme
 import com.oreomrone.locallens.ui.utils.SampleData
+import kotlinx.coroutines.launch
 
 @Composable
 fun DiscoverSearch(
@@ -78,7 +82,7 @@ fun DiscoverSearch(
 @Composable
 private fun DiscoverSearch(
   uiState: DiscoverSearchUiState = DiscoverSearchUiState(),
-  onSearchQueryChange: (String) -> Unit = {},
+  onSearchQueryChange: suspend (String) -> Unit = {},
   onFilterChange: (DiscoverSearchFilter) -> Unit = {},
   backOnClick: () -> Unit = {},
   placeResultOnClick: (String) -> Unit = {},
@@ -86,6 +90,8 @@ private fun DiscoverSearch(
 ) {
 
   val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+
+  val coroutineScope = rememberCoroutineScope()
 
   val focusManager = LocalFocusManager.current
   val focusRequester = FocusRequester()
@@ -95,7 +101,9 @@ private fun DiscoverSearch(
   }
 
   Scaffold(
-    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection).imePadding(),
+    modifier = Modifier
+      .nestedScroll(scrollBehavior.nestedScrollConnection)
+      .imePadding(),
     topBar = {
       Surface(color = MaterialTheme.colorScheme.surface) {
         Column {
@@ -114,7 +122,11 @@ private fun DiscoverSearch(
               .height(56.dp)
           ) {
             OutlinedTextField(value = uiState.query,
-              onValueChange = { onSearchQueryChange(it) },
+              onValueChange = {
+                coroutineScope.launch {
+                  onSearchQueryChange(it)
+                }
+              },
               modifier = Modifier.focusRequester(focusRequester),
               shape = RoundedCornerShape(99.dp),
               label = null,
@@ -140,7 +152,11 @@ private fun DiscoverSearch(
                 if (uiState.query.isNotEmpty()) {
                   //  Clear icon
                   IconButton(
-                    onClick = { onSearchQueryChange("") },
+                    onClick = {
+                      coroutineScope.launch {
+                        onSearchQueryChange("")
+                      }
+                    },
                     modifier = Modifier.padding(end = 4.dp)
                   ) {
                     Icon(
@@ -205,9 +221,10 @@ private fun DiscoverSearch(
           textAlign = TextAlign.Center
         )
       }
-    }
+    } else
     Column(
       modifier = Modifier
+        .verticalScroll(rememberScrollState())
         .padding(top = innerPadding.calculateTopPadding())
         .imePadding()
     ) {

@@ -60,7 +60,7 @@ fun DetailsLayout(
   title: String = "",
   subtitle: String = "",
   ternaryText: String = "",
-  image: Any = "",
+  image: Any? = "",
   showBackButton: Boolean = false,
   backOnClick: () -> Unit = {},
   isLoading: Boolean = false,
@@ -270,7 +270,8 @@ fun DetailsLayout(
 @Composable
 private fun DetailsLayoutPreview() {
   LocalLensTheme {
-    DetailsLayout(title = "This is an extremely long title that should be truncated",
+    DetailsLayout(
+      title = "This is an extremely long title that should be truncated",
       subtitle = "This is an extremely long subtitle that should be truncated",
       ternaryText = "Hello",
       image = "https://picsum.photos/seed/picsum/200/300",

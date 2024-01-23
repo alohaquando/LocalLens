@@ -17,6 +17,7 @@ class TestRepositoryImpl @Inject constructor(
   private val profileRepository: ProfileRepository
 ) : TestRepository {
   override suspend fun test() {
-      profileRepository.toggleFollow("67b4b73d-d8fe-4449-9a0b-fed55f12cfdc")
+//      placeRepository.getPlacesByName("Sài Gòn")
+//    profileRepository.getProfilesByUsername("he")
   }
 }

@@ -20,5 +20,7 @@ interface PlaceRepository {
     latitude: Double,
     longitude: Double
   ): Pair<Boolean, String>
+
+  suspend fun getPlacesByName(name: String): List<PlaceDto>
 }
 

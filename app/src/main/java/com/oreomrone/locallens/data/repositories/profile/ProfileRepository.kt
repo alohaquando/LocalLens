@@ -24,5 +24,6 @@ interface ProfileRepository {
   suspend fun followProfile(id: String): Pair<Boolean, String>
   suspend fun unfollowProfile(id: String): Pair<Boolean, String>
   suspend fun toggleFollow(id: String): Pair<Boolean, String>
+  suspend fun getProfilesByUsername(username: String): List<ProfileDto>
 }
 

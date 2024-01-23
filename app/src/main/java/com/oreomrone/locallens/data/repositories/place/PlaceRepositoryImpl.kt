@@ -166,4 +166,25 @@ class PlaceRepositoryImpl @Inject constructor(
       )
     }
   }
+
+  override suspend fun getPlacesByName(name: String): List<PlaceDto> {
+    return try {
+      val res = postgrest.from(table).select {
+        filter {
+          ilike("name", "*${name}*")
+        }
+      }.decodeList<PlaceDto>()
+      Log.d(
+        "PlaceRepositoryImpl",
+        "getPlacesByName: $res"
+      )
+      res
+    } catch (e: RestException) {
+      Log.e(
+        "PlaceRepositoryImpl",
+        "getPlacesByName: $e"
+      )
+      emptyList()
+    }
+  }
 }
