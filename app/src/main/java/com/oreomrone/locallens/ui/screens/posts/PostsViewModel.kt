@@ -29,7 +29,7 @@ class PostsViewModel @Inject constructor(
     getPosts()
   }
 
-  private fun getPosts() {
+  fun getPosts() {
     viewModelScope.launch {
       val posts = postRepository.getAllPost().map { it.toPost() }
       val postsClusterItems = posts.map {

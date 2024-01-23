@@ -2,6 +2,7 @@ package com.oreomrone.locallens.ui.screens.posts
 
 import android.content.res.Configuration
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +27,10 @@ fun Posts(
 
   val context = LocalContext.current
   val packageManager = context.packageManager
+
+  LaunchedEffect(Unit) {
+    viewModel.getPosts()
+  }
 
   Posts(
     uiState = uiState,
