@@ -74,6 +74,7 @@ fun DetailsPerson(
     favoriteOnClick = postViewModel::performFavoritePost,
     deleteOnClick = postViewModel::performDeletePost,
     messageOnClick = messageOnClick,
+    refreshOnClick = viewModel::initializeUiState
   )
 }
 
@@ -95,6 +96,7 @@ private fun DetailsPerson(
   navigateOnClick: (Double, Double, String) -> Unit = { _, _, _ -> },
   favoriteOnClick: suspend (String) -> Unit = {},
   deleteOnClick: suspend (String) -> Unit = {},
+  refreshOnClick: suspend () -> Unit = {},
 ) {
 
 
@@ -187,15 +189,19 @@ private fun DetailsPerson(
             }
           }) {
           if (uiState.user != null) {
+            val coroutineScope = rememberCoroutineScope()
             for (post in uiState.user.posts) {
-              Post(
-                postId = post.id,
+              Post(postId = post.id,
                 showDivider = true,
                 showUser = false,
                 placeOnClick = { placeOnClick(post.place.id) },
-                userOnClick = {  },
+                userOnClick = { },
                 editOnClick = { editOnClick(post.id) },
-              )
+                afterDeletionCallback = {
+                  coroutineScope.launch {
+                    refreshOnClick()
+                  }
+                })
             }
           }
         }

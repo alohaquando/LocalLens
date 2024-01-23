@@ -1,5 +1,6 @@
 package com.oreomrone.locallens.ui.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,6 +70,7 @@ fun Post(
   placeOnClick: () -> Unit = {},
   userOnClick: () -> Unit = {},
   editOnClick: () -> Unit = {},
+  afterDeletionCallback: () -> Unit = {},
 ) {
   val postViewModel: PostViewModel = hiltViewModel(key = postId)
   val postUiState: PostUiState = postViewModel.uiState.collectAsStateWithLifecycle().value
@@ -92,6 +94,7 @@ fun Post(
     userImageModel = postUiState.userImageModel,
     favorites = postUiState.favorites.size,
     isFavorite = postUiState.isFavorite,
+    isDeleted = postUiState.isDeleted,
     favoriteLoadingState = postUiState.favoriteLoadingState,
     showMenuButton = postUiState.showMenuButton,
 
@@ -112,9 +115,14 @@ fun Post(
     },
     placeOnClick = placeOnClick,
     userOnClick = userOnClick,
-    promoteOnClick = {  },
+    promoteOnClick = { },
     editOnClick = editOnClick,
-    deleteOnClick = {  },
+    deleteOnClick = {
+      coroutineScope.launch {
+        postViewModel.performDeletePost(postId)
+      }
+    },
+    afterDeletionCallback = afterDeletionCallback
   )
 }
 
@@ -129,6 +137,7 @@ fun Post(
   postImageModel: Any? = null,
   userImageModel: Any? = null,
   isFavorite: Boolean = false,
+  isDeleted: Boolean = false,
   showDivider: Boolean = true,
   showUser: Boolean = true,
   showMenuButton: Boolean = false,
@@ -139,6 +148,7 @@ fun Post(
   promoteOnClick: () -> Unit = {},
   editOnClick: () -> Unit = {},
   deleteOnClick: () -> Unit = {},
+  afterDeletionCallback: () -> Unit = {},
   favoriteLoadingState: LoadingStates = LoadingStates.IDLE,
 ) {
   var captionIsOverflowing by remember {
@@ -157,266 +167,279 @@ fun Post(
 
   var showDeleteDialog by remember { mutableStateOf(false) }
 
-  Column(modifier = Modifier.padding(top = 8.dp)) {
-    Image(
-      modifier = Modifier.fillMaxWidth(),
-      boxModifier = Modifier
-        .padding(horizontal = 16.dp)
-        .padding(
-          top = 16.dp,
-          bottom = 8.dp
-        )
-        .aspectRatio(1f)
-        .clip(RoundedCornerShape(16.dp)),
-      model = postImageModel
-    )
-
-
-    Column {
-      Row {
-        Column(
-          modifier = Modifier
-            .weight(1f)
-            .clickable(onClick = placeOnClick)
-            .padding(vertical = 8.dp)
-            .padding(
-              start = 16.dp,
-              end = 8.dp
-            ),
-          verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-          Text(
-            text = place,
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
-          )
-          Text(
-            text = address,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-          )
-        }
-        Row(modifier = Modifier
-          .conditional(showMenuButton) {
-            weight(0.8f)
-          }
-          .conditional(!showMenuButton) {
-            weight(0.5f)
-          }
-          .padding(end = 16.dp)
-          .padding(top = 4.dp),
-          horizontalArrangement = Arrangement.spacedBy(
-            8.dp,
-            Alignment.End
-          )) {
-          IconButton(
-            onClick = navigateOnClick,
-            colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
-          ) {
-            Icon(
-              imageVector = Icons.Outlined.Navigation,
-              contentDescription = "Navigate to $place",
-            )
-          }
-          IconButton(
-            onClick = favoriteOnClick,
-            enabled = favoriteLoadingState == LoadingStates.IDLE || favoriteLoadingState == LoadingStates.SUCCESS,
-            colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = if (isFavorite.not()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
-          ) {
-            when (favoriteLoadingState) {
-              LoadingStates.LOADING -> {
-                CircularProgressIndicator(
-                  modifier = Modifier.size(24.dp),
-
-                )
-              }
-
-              else                  -> {
-                Icon(
-                  imageVector = if (isFavorite.not()) {
-                    Icons.Rounded.FavoriteBorder
-                  } else {
-                    Icons.Rounded.Favorite
-                  },
-                  contentDescription = "Toggle favorite of this post",
-                )
-              }
-            }
-          }
-
-          if (showMenuButton) {
-            Box {
-              IconButton(
-                onClick = { expandMenu = true },
-                colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
-              ) {
-                Icon(
-                  imageVector = Icons.Rounded.MoreVert,
-                  contentDescription = "More actions",
-                )
-              }
-              DropdownMenu(
-                expanded = expandMenu,
-                onDismissRequest = { expandMenu = false },
-                offset = DpOffset(
-                  x = 16.dp,
-                  y = 0.dp
-                )
-              ) {
-                DropdownMenuItem(text = { Text(text = "Promote") },
-                  leadingIcon = {
-                    Icon(
-                      imageVector = Icons.Rounded.Star,
-                      contentDescription = "Promote"
-                    )
-                  },
-                  onClick = { promoteOnClick() })
-                Divider()
-                DropdownMenuItem(text = { Text(text = "Edit") },
-                  leadingIcon = {
-                    Icon(
-                      imageVector = Icons.Rounded.Edit,
-                      contentDescription = "Edit"
-                    )
-                  },
-                  onClick = { editOnClick() })
-                DropdownMenuItem(
-                  text = { Text(text = "Delete") },
-                  leadingIcon = {
-                    Icon(
-                      imageVector = Icons.Rounded.Delete,
-                      contentDescription = "Delete"
-                    )
-                  },
-                  onClick = {
-                    expandMenu = false
-                    showDeleteDialog = true
-                  },
-                  colors = MenuDefaults.itemColors(
-                    textColor = MaterialTheme.colorScheme.error,
-                    leadingIconColor = MaterialTheme.colorScheme.error
-                  )
-                )
-              }
-            }
-          }
-        }
+  AnimatedContent(
+    targetState = isDeleted,
+    label = "Delete Post animation",
+  ) {
+    when (it) {
+      true -> {
+        afterDeletionCallback()
       }
 
-      Column(modifier = Modifier
-        .clickable(enabled = captionLineCount >= 3) {
-          expandCaption = !expandCaption
-        }
-        .animateContentSize()
-        .padding(vertical = 4.dp)
-        .padding(horizontal = 16.dp)) {
-        Text(text = caption,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          maxLines = if (expandCaption) Int.MAX_VALUE else 3,
-          overflow = if (expandCaption) TextOverflow.Visible else TextOverflow.Ellipsis,
-          onTextLayout = {
-            captionIsOverflowing = it.hasVisualOverflow
-            captionLineCount = it.lineCount
-          })
-
-
-        if (captionLineCount >= 3) {
-          if (captionIsOverflowing && !expandCaption) {
-            Text(
-              text = "See more",
-              style = MaterialTheme.typography.titleMedium
-            )
-          } else {
-            Text(
-              text = "See less",
-              style = MaterialTheme.typography.titleMedium
-            )
-          }
-        }
-      }
-
-      Spacer(modifier = Modifier.size(4.dp))
-
-      Row(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-      ) {
-        Row(
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          Text(
-            text = date,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-          )
-        }
-
-        Icon(
-          imageVector = Icons.Rounded.Circle,
-          contentDescription = "Circle",
-          modifier = Modifier.size(4.dp),
-          tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-        )
-
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(4.dp)
-
-        ) {
-          Icon(
-            imageVector = Icons.Rounded.FavoriteBorder,
-            contentDescription = "Favorite Border",
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-          )
-          Text(
-            text = favorites.toString(),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-          )
-          Text(
-            text = "fav" + if (favorites != 1) "s" else "",
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-          )
-        }
-      }
-
-      Spacer(modifier = Modifier.size(4.dp))
-
-      if (showUser) {
-        Row(modifier = Modifier
-          .clickable {
-            userOnClick()
-          }
-          .fillMaxWidth()
-          .padding(horizontal = 16.dp)
-          .padding(vertical = 16.dp),
-          verticalAlignment = Alignment.Top,
-          horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      false -> {
+        Column(modifier = Modifier.padding(top = 8.dp)) {
           Image(
-            modifier = Modifier
-              .size(24.dp)
+            modifier = Modifier.fillMaxWidth(),
+            boxModifier = Modifier
+              .padding(horizontal = 16.dp)
+              .padding(
+                top = 16.dp,
+                bottom = 8.dp
+              )
               .aspectRatio(1f)
-              .clip(CircleShape),
-            model = userImageModel,
-            onClick = userOnClick
+              .clip(RoundedCornerShape(16.dp)),
+            model = postImageModel
           )
-          Text(
-            text = "@${username}",
-            style = MaterialTheme.typography.titleMedium,
-            lineHeight = 0.sp
-          )
+
+
+          Column {
+            Row {
+              Column(
+                modifier = Modifier
+                  .weight(1f)
+                  .clickable(onClick = placeOnClick)
+                  .padding(vertical = 8.dp)
+                  .padding(
+                    start = 16.dp,
+                    end = 8.dp
+                  ),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+              ) {
+                Text(
+                  text = place,
+                  style = MaterialTheme.typography.titleMedium,
+                  maxLines = 2,
+                  overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                  text = address,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis
+                )
+              }
+              Row(modifier = Modifier
+                .conditional(showMenuButton) {
+                  weight(0.8f)
+                }
+                .conditional(!showMenuButton) {
+                  weight(0.5f)
+                }
+                .padding(end = 16.dp)
+                .padding(top = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(
+                  8.dp,
+                  Alignment.End
+                )) {
+                IconButton(
+                  onClick = navigateOnClick,
+                  colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+                ) {
+                  Icon(
+                    imageVector = Icons.Outlined.Navigation,
+                    contentDescription = "Navigate to $place",
+                  )
+                }
+                IconButton(
+                  onClick = favoriteOnClick,
+                  enabled = favoriteLoadingState == LoadingStates.IDLE || favoriteLoadingState == LoadingStates.SUCCESS,
+                  colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = if (isFavorite.not()) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
+                ) {
+                  when (favoriteLoadingState) {
+                    LoadingStates.LOADING -> {
+                      CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+
+                        )
+                    }
+
+                    else                  -> {
+                      Icon(
+                        imageVector = if (isFavorite.not()) {
+                          Icons.Rounded.FavoriteBorder
+                        } else {
+                          Icons.Rounded.Favorite
+                        },
+                        contentDescription = "Toggle favorite of this post",
+                      )
+                    }
+                  }
+                }
+
+                if (showMenuButton) {
+                  Box {
+                    IconButton(
+                      onClick = { expandMenu = true },
+                      colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+                    ) {
+                      Icon(
+                        imageVector = Icons.Rounded.MoreVert,
+                        contentDescription = "More actions",
+                      )
+                    }
+                    DropdownMenu(
+                      expanded = expandMenu,
+                      onDismissRequest = { expandMenu = false },
+                      offset = DpOffset(
+                        x = 16.dp,
+                        y = 0.dp
+                      )
+                    ) {
+                      DropdownMenuItem(text = { Text(text = "Promote") },
+                        leadingIcon = {
+                          Icon(
+                            imageVector = Icons.Rounded.Star,
+                            contentDescription = "Promote"
+                          )
+                        },
+                        onClick = { promoteOnClick() })
+                      Divider()
+                      DropdownMenuItem(text = { Text(text = "Edit") },
+                        leadingIcon = {
+                          Icon(
+                            imageVector = Icons.Rounded.Edit,
+                            contentDescription = "Edit"
+                          )
+                        },
+                        onClick = { editOnClick() })
+                      DropdownMenuItem(
+                        text = { Text(text = "Delete") },
+                        leadingIcon = {
+                          Icon(
+                            imageVector = Icons.Rounded.Delete,
+                            contentDescription = "Delete"
+                          )
+                        },
+                        onClick = {
+                          expandMenu = false
+                          showDeleteDialog = true
+                        },
+                        colors = MenuDefaults.itemColors(
+                          textColor = MaterialTheme.colorScheme.error,
+                          leadingIconColor = MaterialTheme.colorScheme.error
+                        )
+                      )
+                    }
+                  }
+                }
+              }
+            }
+
+            Column(modifier = Modifier
+              .clickable(enabled = captionLineCount >= 3) {
+                expandCaption = !expandCaption
+              }
+              .animateContentSize()
+              .padding(vertical = 4.dp)
+              .padding(horizontal = 16.dp)) {
+              Text(text = caption,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = if (expandCaption) Int.MAX_VALUE else 3,
+                overflow = if (expandCaption) TextOverflow.Visible else TextOverflow.Ellipsis,
+                onTextLayout = {
+                  captionIsOverflowing = it.hasVisualOverflow
+                  captionLineCount = it.lineCount
+                })
+
+
+              if (captionLineCount >= 3) {
+                if (captionIsOverflowing && !expandCaption) {
+                  Text(
+                    text = "See more",
+                    style = MaterialTheme.typography.titleMedium
+                  )
+                } else {
+                  Text(
+                    text = "See less",
+                    style = MaterialTheme.typography.titleMedium
+                  )
+                }
+              }
+            }
+
+            Spacer(modifier = Modifier.size(4.dp))
+
+            Row(
+              modifier = Modifier.padding(horizontal = 16.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Text(
+                  text = date,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+              }
+
+              Icon(
+                imageVector = Icons.Rounded.Circle,
+                contentDescription = "Circle",
+                modifier = Modifier.size(4.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+              )
+
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+              ) {
+                Icon(
+                  imageVector = Icons.Rounded.FavoriteBorder,
+                  contentDescription = "Favorite Border",
+                  modifier = Modifier.size(16.dp),
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                Text(
+                  text = favorites.toString(),
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+                Text(
+                  text = "fav" + if (favorites != 1) "s" else "",
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                )
+              }
+            }
+
+            Spacer(modifier = Modifier.size(4.dp))
+
+            if (showUser) {
+              Row(modifier = Modifier
+                .clickable {
+                  userOnClick()
+                }
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .padding(vertical = 16.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Image(
+                  modifier = Modifier
+                    .size(24.dp)
+                    .aspectRatio(1f)
+                    .clip(CircleShape),
+                  model = userImageModel,
+                  onClick = userOnClick
+                )
+                Text(
+                  text = "@${username}",
+                  style = MaterialTheme.typography.titleMedium,
+                  lineHeight = 0.sp
+                )
+              }
+            }
+
+            Spacer(modifier = Modifier.size(32.dp))
+
+            if (showDivider) {
+              Divider(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+              )
+            }
+          }
         }
-      }
-
-      Spacer(modifier = Modifier.size(32.dp))
-
-      if (showDivider) {
-        Divider(
-          modifier = Modifier.padding(horizontal = 16.dp),
-          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
-        )
       }
     }
   }

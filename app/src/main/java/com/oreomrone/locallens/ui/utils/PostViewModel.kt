@@ -7,6 +7,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.data.repositories.profile.ProfileRepository
 import com.oreomrone.locallens.domain.LoadingStates
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,6 +33,8 @@ class PostViewModel @Inject constructor(
   val uiState: StateFlow<PostUiState> = _uiState.asStateFlow()
 
   suspend fun getPost(id: String) {
+    viewModelScope.launch {
+
     val post = postRepository.getPost(id)?.toPost()
 
     if (post != null) {
@@ -87,7 +91,7 @@ class PostViewModel @Inject constructor(
         }
       }
       //endregion
-    }
+    }}
   }
 
   suspend fun performPromotePost(id: String) {
@@ -95,10 +99,19 @@ class PostViewModel @Inject constructor(
   }
 
   suspend fun performDeletePost(id: String) {
-    // TODO
+    viewModelScope.launch {
+      postRepository.deletePost(id)
+      _uiState.update { currentState ->
+        currentState.copy(
+          isDeleted = true
+        )
+      }
+    }
   }
 
   suspend fun performFavoritePost(id: String) {
+    viewModelScope.launch {
+
     _uiState.update { currentState ->
       currentState.copy(
         favoriteLoadingState = LoadingStates.LOADING
@@ -111,7 +124,7 @@ class PostViewModel @Inject constructor(
         favoriteLoadingState = LoadingStates.SUCCESS
       )
     }
-  }
+  }}
 
   fun performNavigate(
     lat: Double,
@@ -171,6 +184,7 @@ data class PostUiState(
   val userImageModel: Any = "",
   val favorites: List<User> = emptyList(),
   val isFavorite: Boolean = false,
+  val isDeleted: Boolean = false,
   val showMenuButton: Boolean = false,
   val favoriteLoadingState: LoadingStates = LoadingStates.IDLE
 )

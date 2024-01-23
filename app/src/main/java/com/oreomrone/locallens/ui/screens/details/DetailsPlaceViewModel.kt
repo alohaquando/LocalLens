@@ -34,7 +34,7 @@ class DetailsPlaceViewModel @Inject constructor(
     viewModelScope.launch { initializeUiState() }
   }
 
-  private suspend fun initializeUiState() {
+  suspend fun initializeUiState() {
     if (id.isNullOrEmpty()) {
       logAndSetError("id is null or empty")
       return

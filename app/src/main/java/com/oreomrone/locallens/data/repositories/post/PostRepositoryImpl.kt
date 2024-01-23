@@ -462,13 +462,20 @@ class PostRepositoryImpl @Inject constructor(
           placeRes.second
         )
       } else {
-        val res = postgrest.from(table).update(
-          {
-            set("caption", caption)
-            set("visibility", visibility)
-            set("place", placeRes.second)
-          }
-        ) {
+        val res = postgrest.from(table).update({
+          set(
+            "caption",
+            caption
+          )
+          set(
+            "visibility",
+            visibility
+          )
+          set(
+            "place",
+            placeRes.second
+          )
+        }) {
           select()
           filter {
             eq(
@@ -510,6 +517,55 @@ class PostRepositoryImpl @Inject constructor(
       Log.e(
         "PostRepositoryImpl",
         "updatePost: $e"
+      )
+      Pair(
+        false,
+        e.message ?: "An error occurred. ${e.message?.take(50)}..."
+      )
+    }
+  }
+
+  override suspend fun deletePost(id: String): Pair<Boolean, String> {
+    return try {
+      val res = postgrest.from(table).delete {
+        select()
+        filter {
+          eq("id", id)
+        }
+      }.decodeSingleOrNull<PostDto>()
+
+      if (res != null ) {
+        Log.d(
+          "PostRepositoryImpl",
+          "deletePost: $res"
+        )
+        Pair(
+          true,
+          "Post deleted successfully."
+        )
+      } else{
+        Log.e(
+          "PostRepositoryImpl",
+          "deletePost: Deleted but returned null $res"
+        )
+        Pair(
+          false,
+          "An error occurred. Please try again."
+        )
+      }
+    } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "deletePost: $e"
+      )
+      Pair(
+        false,
+        e.message ?: "An error occurred. ${e.message?.take(50)}..."
+      )
+    } catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "deletePost: $e"
       )
       Pair(
         false,

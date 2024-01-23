@@ -37,5 +37,7 @@ interface PostRepository {
     placeLatitude: Double,
     placeLongitude: Double
   ): Pair<Boolean, String>
+
+  suspend fun deletePost(id: String): Pair<Boolean, String>
 }
 

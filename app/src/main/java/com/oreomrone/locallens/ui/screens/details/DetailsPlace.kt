@@ -59,6 +59,7 @@ fun DetailsPlace(
     },
     favoriteOnClick = postViewModel::performFavoritePost,
     deleteOnClick = postViewModel::performDeletePost,
+    refreshOnClick = viewModel::initializeUiState
   )
 }
 
@@ -74,7 +75,9 @@ private fun DetailsPlace(
   navigateOnClick: (Double, Double, String) -> Unit = { _, _, _ -> },
   favoriteOnClick: suspend (String) -> Unit = {},
   deleteOnClick: suspend (String) -> Unit = {},
-) {
+  refreshOnClick: suspend () -> Unit = {},
+
+  ) {
   val coroutineScope = rememberCoroutineScope()
 
   Crossfade(targetState = uiState.loadingStates,
@@ -133,6 +136,11 @@ private fun DetailsPlace(
                 placeOnClick = {  },
                 userOnClick = { userOnClick(post.user?.id.toString()) },
                 editOnClick = { editOnClick(post.id) },
+                afterDeletionCallback = {
+                  coroutineScope.launch {
+                    refreshOnClick()
+                  }
+                }
               )
             }
           }

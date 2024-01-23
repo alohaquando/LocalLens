@@ -58,6 +58,7 @@ fun Me(
     placeOnClick = placeOnClick,
     userOnClick = userOnClick,
     editOnClick = editOnClick,
+    refreshOnClick = viewModel::initializeUiState
   )
 }
 
@@ -76,6 +77,7 @@ private fun Me(
   placeOnClick: (String) -> Unit = {},
   userOnClick: (String) -> Unit = {},
   editOnClick: (String) -> Unit = {},
+  refreshOnClick: suspend () -> Unit = {},
 ) {
 
   DetailsLayout(title = if (uiState.user != null) "@${uiState.user.username}" else "",
@@ -153,6 +155,7 @@ private fun Me(
     }
   ) {
     if (uiState.user != null) {
+      val coroutineScope = rememberCoroutineScope()
       for (post in uiState.user.posts) {
         Post(
           postId = post.id,
@@ -161,6 +164,11 @@ private fun Me(
           placeOnClick = { placeOnClick(post.place.id) },
           userOnClick = { userOnClick(post.user?.id.toString()) },
           editOnClick = { editOnClick(post.id) },
+          afterDeletionCallback = {
+            coroutineScope.launch {
+              refreshOnClick()
+            }
+          }
         )
       }
     }

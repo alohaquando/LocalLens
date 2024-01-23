@@ -162,6 +162,11 @@ fun PostsMapLayout(
                 placeOnClick = { placeOnClick(post.place.id) },
                 userOnClick = { userOnClick(post.user?.id.toString()) },
                 editOnClick = { editOnClick(post.id) },
+                afterDeletionCallback = {
+                  coroutineScope.launch {
+                    refreshOnClick()
+                  }
+                }
               )
             }
             Spacer(
@@ -258,6 +263,11 @@ fun PostsMapLayout(
             editOnClick = {
               showModalBottomSheet = false
               editOnClick(clickedPost!!.id) },
+            afterDeletionCallback = {
+              coroutineScope.launch {
+                refreshOnClick()
+              }
+            }
             )
 
           Spacer(

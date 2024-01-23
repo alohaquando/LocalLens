@@ -27,6 +27,11 @@ class MeViewModel @Inject constructor(
   val uiState: StateFlow<MeUiState> = _uiState.asStateFlow()
 
   init {
+    viewModelScope.launch { initializeUiState() }
+
+  }
+
+  suspend fun initializeUiState() {
     viewModelScope.launch {
       auth.currentSessionOrNull()?.user?.let { it ->
         val profile = profileRepository.getProfileById(it.id)
