@@ -12,3 +12,10 @@ data class FollowerDto (
 data class FollowingsDto (
   @SerialName("followed") val followed: String = ""
 )
+
+
+@Serializable
+data class FollowsDto (
+  @SerialName("follower") val follower: String = "",
+  @SerialName("followed") val followed: String = ""
+)

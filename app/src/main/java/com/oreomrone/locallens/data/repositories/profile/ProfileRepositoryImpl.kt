@@ -1,6 +1,8 @@
 package com.oreomrone.locallens.data.repositories.profile
 
 import android.util.Log
+import com.oreomrone.locallens.data.dto.FollowingsDto
+import com.oreomrone.locallens.data.dto.FollowsDto
 import com.oreomrone.locallens.data.dto.ProfileDto
 import com.oreomrone.locallens.data.dto.ProfilesWrapperDto
 import com.oreomrone.locallens.data.utils.BuildProfileImageUrl
@@ -21,6 +23,7 @@ class ProfileRepositoryImpl @Inject constructor(
   private val storage: Storage
 ) : ProfileRepository {
   private val table = "profiles"
+  private val followsTable = "follows"
 
   override suspend fun getAllProfile(): List<ProfileDto> {
     return try {
@@ -279,6 +282,133 @@ class ProfileRepositoryImpl @Inject constructor(
         "getIsSuperUserById: $e"
       )
       false
+    }
+  }
+
+  override suspend fun followProfile(id: String): Pair<Boolean, String> {
+    return try {
+      val res = postgrest.from(followsTable).insert(
+        FollowingsDto(
+          followed = id,
+        )
+      ) {
+        select()
+      }.decodeSingleOrNull<ProfileDto>()
+
+      if (res != null) {
+        Log.d(
+          "ProfileRepositoryImpl",
+          "followProfile: $res"
+        )
+        Pair(
+          true,
+          "Profile followed successfully."
+        )
+      } else {
+        Log.e(
+          "ProfileRepositoryImpl",
+          "followProfile: returned null $res"
+        )
+        Pair(
+          false,
+          "Failed to follow profile."
+        )
+      }
+    } catch (e: RestException) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "followProfile: $e"
+      )
+      Pair(
+        false,
+        "Failed to follow profile. ${e.message?.take(50)}..."
+      )
+    } catch (e: Exception) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "followProfile: $e"
+      )
+      Pair(
+        false,
+        "Failed to follow profile. ${e.message?.take(50)}..."
+      )
+    }
+  }
+
+  override suspend fun unfollowProfile(id: String): Pair<Boolean, String> {
+    return try {
+      val res = postgrest.from(followsTable).delete {
+        select()
+        filter {
+          eq(
+            "followed",
+            id
+          )
+          eq(
+            "follower",
+            auth.currentUserOrNull()?.id ?: ""
+          )
+        }
+      }.decodeSingleOrNull<FollowsDto>()
+
+      if (res != null) {
+        Log.d(
+          "ProfileRepositoryImpl",
+          "unfollowProfile: $res"
+        )
+        Pair(
+          true,
+          "Profile unfollowed successfully."
+        )
+      } else {
+        Log.e(
+          "ProfileRepositoryImpl",
+          "unfollowProfile: returned null $res"
+        )
+        Pair(
+          false,
+          "Failed to unfollow profile."
+        )
+      }
+    } catch (e: RestException) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "unfollowProfile: $e"
+      )
+      Pair(
+        false,
+        "Failed to unfollow profile. ${e.message?.take(50)}..."
+      )
+    } catch (e: Exception) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "unfollowProfile: $e"
+      )
+      Pair(
+        false,
+        "Failed to unfollow profile. ${e.message?.take(50)}..."
+      )
+    }
+  }
+
+  override suspend fun toggleFollow(id: String) : Pair<Boolean, String> {
+    val res = postgrest.from(followsTable).select {
+      filter {
+        eq(
+          "followed",
+          id
+        )
+        eq(
+          "follower",
+          auth.currentUserOrNull()?.id ?: ""
+        )
+      }
+    }.decodeSingleOrNull<FollowsDto>()
+
+    return if (res != null) {
+      unfollowProfile(id)
+    } else {
+      followProfile(id)
     }
   }
 }

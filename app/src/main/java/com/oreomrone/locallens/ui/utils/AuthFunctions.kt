@@ -3,12 +3,11 @@ package com.oreomrone.locallens.ui.utils
 import com.oreomrone.locallens.domain.User
 
 fun validatePassword(password: String): Boolean {
-//  return password.length > 8 && password.contains(
-//    regex = Regex(
-//      """^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s])"""
-//    )
-//  )
-  return password.length > 3
+  return password.length > 8 && password.contains(
+    regex = Regex(
+      """^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s])"""
+    )
+  )
 }
 
 fun validatePasswordConfirm(

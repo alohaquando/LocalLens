@@ -8,7 +8,11 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,7 +59,7 @@ fun DetailsPerson(
   DetailsPerson(
     uiState = uiState,
     backOnClick = backOnClick,
-    followOnClick = {},
+    followOnClick = viewModel::performFollow,
     placesOnClick = placesOnClick,
     followersOnClick = followersOnClick,
     followingOnClick = followingOnClick,
@@ -85,7 +89,7 @@ fun DetailsPerson(
 private fun DetailsPerson(
   uiState: DetailsPersonUiState = DetailsPersonUiState(),
   backOnClick: () -> Unit = {},
-  followOnClick: () -> Unit = {},
+  followOnClick: suspend (String) -> Unit = {},
   placesOnClick: (String) -> Unit = {},
   followersOnClick: (String) -> Unit = {},
   followingOnClick: (String) -> Unit = {},
@@ -116,6 +120,8 @@ private fun DetailsPerson(
       }
 
       else                  -> {
+        val coroutineScope = rememberCoroutineScope()
+
         DetailsLayout(title = if (uiState.user != null) "@${uiState.user.username}" else "",
           subtitle = uiState.user?.name ?: "",
           image = uiState.user?.image ?: "",
@@ -134,11 +140,28 @@ private fun DetailsPerson(
               ),
             ) {
               FilledTonalButton(
-                onClick = followOnClick,
+                onClick = {
+                  coroutineScope.launch {
+                    followOnClick(uiState.user?.id.toString())
+                  }
+                },
                 modifier = Modifier.weight(1f)
               ) {
-                // TODO: Dynamic this
-                Text(text = "Follow")
+                if (uiState.isFollowing) {
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                  ) {
+                    Icon(
+                      imageVector = Icons.Rounded.Check,
+                      contentDescription = "Following",
+                      modifier = Modifier.size(20.dp)
+                    )
+                    Text(text = "Following")
+                  }
+                } else {
+                  Text(text = "Follow")
+                }
               }
               OutlinedButton(onClick = { messageOnClick() }) {
                 Text(text = "Message")
@@ -239,6 +262,11 @@ private fun DetailsPersonPreview(
 private fun DetailsPersonLoadingPreview(
 ) {
   LocalLensTheme {
-    DetailsPerson(uiState = DetailsPersonUiState(user = null))
+    DetailsPerson(
+      uiState = DetailsPersonUiState(
+        user = null,
+        loadingStates = LoadingStates.IDLE
+      )
+    )
   }
 }

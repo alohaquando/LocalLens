@@ -21,5 +21,8 @@ interface ProfileRepository {
 
   suspend fun getFollowingsById(id: String): List<ProfileDto>
   suspend fun getIsSuperUserById(id: String): Boolean
+  suspend fun followProfile(id: String): Pair<Boolean, String>
+  suspend fun unfollowProfile(id: String): Pair<Boolean, String>
+  suspend fun toggleFollow(id: String): Pair<Boolean, String>
 }
 

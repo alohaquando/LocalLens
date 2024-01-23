@@ -7,13 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.oreomrone.locallens.data.repositories.post.PostRepository
 import com.oreomrone.locallens.data.repositories.profile.ProfileRepository
 import com.oreomrone.locallens.domain.LoadingStates
-import com.oreomrone.locallens.domain.Place
 import com.oreomrone.locallens.domain.Post
 import com.oreomrone.locallens.domain.User
 import com.oreomrone.locallens.domain.dtoToDomain.toPost
 import com.oreomrone.locallens.domain.dtoToDomain.toUser
-import com.oreomrone.locallens.ui.utils.SampleData
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.jan.supabase.gotrue.Auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +24,7 @@ import javax.inject.Inject
 class DetailsPersonViewModel @Inject constructor(
   private val profileRepository: ProfileRepository,
   private val postRepository: PostRepository,
+  private val auth: Auth,
   savedStateHandle: SavedStateHandle
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(DetailsPersonUiState())
@@ -36,7 +36,7 @@ class DetailsPersonViewModel @Inject constructor(
     viewModelScope.launch { initializeUiState() }
   }
 
-   suspend fun initializeUiState() {
+  suspend fun initializeUiState() {
     if (id.isNullOrEmpty()) {
       logAndSetError("id is null or empty")
       return
@@ -50,7 +50,33 @@ class DetailsPersonViewModel @Inject constructor(
         return@launch
       }
 
-      val posts = getPostsByUserId(id);
+      if (user.followers.isEmpty()) {
+        _uiState.update { currentState ->
+          currentState.copy(
+            isFollowing = false
+          )
+        }
+      } else {
+        val currentUserId = auth.currentUserOrNull()?.id
+        for (follower in user.followers) {
+          if (follower.id == currentUserId) {
+            _uiState.update { currentState ->
+              currentState.copy(
+                isFollowing = true
+              )
+            }
+            break
+          } else {
+            _uiState.update { currentState ->
+              currentState.copy(
+                isFollowing = false
+              )
+            }
+          }
+        }
+      }
+
+      val posts = getPostsByUserId(id)
       user.posts = posts
 
       _uiState.update { currentState ->
@@ -62,7 +88,35 @@ class DetailsPersonViewModel @Inject constructor(
     }
   }
 
-  private suspend fun getUser(id: String) : User? {
+  suspend fun performFollow(id: String) {
+    viewModelScope.launch {
+      _uiState.update { currentState ->
+        currentState.copy(
+          loadingStates = LoadingStates.LOADING
+        )
+      }
+
+      val res = profileRepository.toggleFollow(id)
+
+      if (res.first) {
+        _uiState.update { currentState ->
+          currentState.copy(
+            loadingStates = LoadingStates.SUCCESS
+          )
+        }
+      } else {
+        _uiState.update { currentState ->
+          currentState.copy(
+            loadingStates = LoadingStates.ERROR
+          )
+        }
+      }
+
+      initializeUiState()
+    }
+  }
+
+  private suspend fun getUser(id: String): User? {
     return profileRepository.getProfileById(id)?.toUser()
   }
 
@@ -85,5 +139,6 @@ class DetailsPersonViewModel @Inject constructor(
 
 data class DetailsPersonUiState(
   val user: User? = null,
+  val isFollowing: Boolean = false,
   val loadingStates: LoadingStates = LoadingStates.LOADING
 )
