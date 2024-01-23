@@ -40,7 +40,7 @@ I did everything in this submission, including:
     - ✅ Place details and list of posts taken at a place
 - ✅ Map and location services of posts
     - ✅ View map with all posts
-    - ✅ My location works: ask and use permission, show current location on map (UI for the button is unfinshed, but works)
+    - ✅ My location works: ask and use permission, show current location on map (UI for the button is unfinished, but works)
 - ✅ Search
     - ✅ Search for places and profiles in the system
 ---
