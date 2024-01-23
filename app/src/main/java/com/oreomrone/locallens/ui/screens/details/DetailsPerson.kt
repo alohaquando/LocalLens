@@ -119,6 +119,7 @@ private fun DetailsPerson(
           image = uiState.user?.image ?: "",
           ternaryText = uiState.user?.bio ?: "",
           showBackButton = true,
+          isPrivate = uiState.user?.isPrivate ?: false,
           backOnClick = backOnClick,
           isLoading = uiState.user == null,
           buttonsRowContent = {

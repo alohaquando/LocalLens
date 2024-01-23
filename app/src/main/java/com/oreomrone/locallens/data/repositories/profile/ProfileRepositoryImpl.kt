@@ -273,6 +273,12 @@ class ProfileRepositoryImpl @Inject constructor(
         "getIsSuperUserById: $e"
       )
       false
+    } catch (e: Exception) {
+      Log.e(
+        "ProfileRepositoryImpl",
+        "getIsSuperUserById: $e"
+      )
+      false
     }
   }
 }
