@@ -26,5 +26,6 @@ interface PostRepository {
 
   suspend fun favoritePost(id: String): Pair<Boolean, String>
   suspend fun unfavoritePost(id: String): Pair<Boolean, String>
+  suspend fun toggleFavorite(id: String)
 }
 

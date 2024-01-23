@@ -26,6 +26,7 @@ class PostRepositoryImpl @Inject constructor(
   private val auth: Auth
 ) : PostRepository {
   private val table = "posts"
+  private val favoriteTable = "posts_favorites"
   private val postQuery = """*,
     places(*),
     profiles!posts_owner_fkey(*),
@@ -82,7 +83,7 @@ class PostRepositoryImpl @Inject constructor(
 
   override suspend fun favoritePost(id: String) : Pair<Boolean,String> {
     return try {
-      val res = postgrest.from("posts_favorites").insert(
+      val res = postgrest.from(favoriteTable).insert(
         PostFavoriteDto(
           postId = id,
         )
@@ -114,7 +115,7 @@ class PostRepositoryImpl @Inject constructor(
 
   override suspend fun unfavoritePost(id: String) : Pair<Boolean,String> {
     return try {
-      val res =postgrest.from("posts_favorites").delete {
+      val res =postgrest.from(favoriteTable).delete {
         select()
         filter {
           eq("post", id)
@@ -141,6 +142,21 @@ class PostRepositoryImpl @Inject constructor(
         "unfavoritePost: $e"
       )
       Pair(false, "Failed to unfavorite post. ${e.message?.take(50)}...")
+    }
+  }
+
+  override suspend fun toggleFavorite(id: String ) {
+    val res = postgrest.from(favoriteTable).select {
+      filter {
+        eq("post", id)
+        eq("favorited_by", auth.currentUserOrNull()?.id ?: "")
+      }
+    }.decodeSingleOrNull<PostFavoriteDto>()
+
+    if (res != null) {
+      unfavoritePost(id)
+    } else {
+      favoritePost(id)
     }
   }
 

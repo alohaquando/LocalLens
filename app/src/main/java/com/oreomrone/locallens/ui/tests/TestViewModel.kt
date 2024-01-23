@@ -26,7 +26,7 @@ class TestViewModel @Inject constructor(
 
   init {
     viewModelScope.launch {
-      postRepository.unfavoritePost("fca77861-ae7c-43c9-a3ed-181c5c32021e")
+      postRepository.toggleFavorite("ac613468-0ee9-4964-b833-9c18ac238da4")
     }
   }
 }
