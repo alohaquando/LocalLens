@@ -153,6 +153,16 @@ class PostRepositoryImpl @Inject constructor(
       )
       Pair(false, "Failed to favorite post. ${e.message?.take(50)}...")
     }
+    catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "favoritePost: $e"
+      )
+      Pair(
+        false,
+        "Failed to favorite post. ${e.message?.take(50)}..."
+      )
+    }
   }
 
   override suspend fun unfavoritePost(id: String) : Pair<Boolean,String> {
@@ -184,6 +194,16 @@ class PostRepositoryImpl @Inject constructor(
         "unfavoritePost: $e"
       )
       Pair(false, "Failed to unfavorite post. ${e.message?.take(50)}...")
+    }
+    catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "unfavoritePost: $e"
+      )
+      Pair(
+        false,
+        "Failed to unfavoritePost post. ${e.message?.take(50)}..."
+      )
     }
   }
 
@@ -322,6 +342,13 @@ class PostRepositoryImpl @Inject constructor(
       )
       emptyList()
     }
+    catch (e: Exception) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPostsByUserId: $e"
+      )
+      emptyList()
+    }
   }
 
   override suspend fun getPostsByUserId(userId: String): List<PostDto> {
@@ -344,6 +371,13 @@ class PostRepositoryImpl @Inject constructor(
       )
       res.sortedByDescending { it.timestamp }
     } catch (e: RestException) {
+      Log.e(
+        "PostRepositoryImpl",
+        "getPostsByUserId: $e"
+      )
+      emptyList()
+    }
+    catch (e: Exception) {
       Log.e(
         "PostRepositoryImpl",
         "getPostsByUserId: $e"
