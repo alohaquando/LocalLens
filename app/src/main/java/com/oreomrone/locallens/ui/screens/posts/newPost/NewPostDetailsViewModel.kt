@@ -30,9 +30,10 @@ class NewPostDetailsViewModel @Inject constructor(
       _uiState.update { currentState ->
         currentState.copy(
           loadingState = LoadingStates.LOADING
-        ) }
+        )
+      }
 
-     val res = postRepository.createPost(
+      val res = postRepository.createPost(
         imageFile = _uiState.value.imageFile,
         imageUrl = _uiState.value.imageURL,
         caption = _uiState.value.caption,
@@ -43,7 +44,7 @@ class NewPostDetailsViewModel @Inject constructor(
         placeLongitude = _uiState.value.selectedPlace!!.longitude,
       )
 
-      if(res.first) {
+      if (res.first) {
         _uiState.update { currentState ->
           currentState.copy(
             loadingState = LoadingStates.SUCCESS
@@ -104,8 +105,7 @@ class NewPostDetailsViewModel @Inject constructor(
   private fun validateInput() {
     _uiState.update { currentState ->
       currentState.copy(
-        inputValid = currentState.captionValid && currentState.imageURL != null && currentState
-          .selectedPlace != null && currentState.visibility.isNotBlank()
+        inputValid = currentState.captionValid && currentState.imageURL != null && currentState.selectedPlace != null && currentState.visibility.isNotBlank()
       )
     }
   }
@@ -147,10 +147,12 @@ class NewPostDetailsViewModel @Inject constructor(
   private fun updateAutocompleteResult() {
     viewModelScope.launch {
       if (_uiState.value.placeSearchQuery.isNotEmpty()) {
-        val places = placesAutocompleteRepository.getPlaceAutocompleteResults(_uiState.value.placeSearchQuery)
-
-        _uiState.update { currentState ->
-          currentState.copy(placeSearchResult = places.map { it.asDomainModel() })
+        placesAutocompleteRepository.getPlaceAutocompleteResultsDebounced(
+          _uiState.value.placeSearchQuery
+        ) { res ->
+          _uiState.update { currentState ->
+            currentState.copy(placeSearchResult = res.map { it.asDomainModel() })
+          }
         }
       }
     }
