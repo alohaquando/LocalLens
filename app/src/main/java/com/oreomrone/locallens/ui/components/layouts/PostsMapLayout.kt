@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -82,6 +83,7 @@ fun PostsMapLayout(
   deleteOnClick: suspend (String) -> Unit = {},
   showBackButton: Boolean = false,
   backOnClick: () -> Unit = {},
+  refreshOnClick: suspend () -> Unit = {},
 ) {
   val coroutineScope = rememberCoroutineScope()
   val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -126,6 +128,18 @@ fun PostsMapLayout(
                 Icon(
                   imageVector = Icons.Outlined.Notifications,
                   contentDescription = "Notifications",
+                )
+              }
+            },
+            navigationIcon = {
+              IconButton(onClick = {
+                coroutineScope.launch {
+                  refreshOnClick()
+                }
+              }) {
+                Icon(
+                  imageVector = Icons.Outlined.Refresh,
+                  contentDescription = "Refresh",
                 )
               }
             },

@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,6 +32,14 @@ class PostsViewModel @Inject constructor(
 
   fun getPosts() {
     viewModelScope.launch {
+      _uiState.update { currentState ->
+        currentState.copy(
+          posts = emptyList(),
+          postsClusterItems = emptyList(),
+          loadingState = LoadingStates.LOADING
+        )
+      }
+      yield()
       val posts = postRepository.getAllPost().map { it.toPost() }
       val postsClusterItems = posts.map {
         PostClusterItem(

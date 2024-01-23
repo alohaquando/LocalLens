@@ -28,10 +28,6 @@ fun Posts(
   val context = LocalContext.current
   val packageManager = context.packageManager
 
-  LaunchedEffect(Unit) {
-    viewModel.getPosts()
-  }
-
   Posts(
     uiState = uiState,
     notificationsOnClick = notificationsOnClick,
@@ -48,7 +44,8 @@ fun Posts(
       )
     },
     favoriteOnClick = postViewModel::performFavoritePost,
-    deleteOnClick = postViewModel::performDeletePost
+    deleteOnClick = postViewModel::performDeletePost,
+    refreshOnClick = viewModel::getPosts
   )
 }
 
@@ -62,6 +59,7 @@ private fun Posts(
   navigateOnClick: (Double, Double, String) -> Unit = { _, _, _ -> },
   favoriteOnClick: suspend (String) -> Unit = {},
   deleteOnClick: suspend (String) -> Unit = {},
+  refreshOnClick: suspend () -> Unit = {}
 ) {
   PostsMapLayout(
     posts = uiState.posts,
@@ -73,7 +71,8 @@ private fun Posts(
     editOnClick = editOnClick,
     navigateOnClick = navigateOnClick,
     favoriteOnClick = favoriteOnClick,
-    deleteOnClick = deleteOnClick
+    deleteOnClick = deleteOnClick,
+    refreshOnClick = refreshOnClick
   )
 }
 
